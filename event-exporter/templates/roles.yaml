@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "event-exporter.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "event-exporter.name" . }}
+    helm.sh/chart: {{ include "event-exporter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "event-exporter.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "event-exporter.name" . }}
+    helm.sh/chart: {{ include "event-exporter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ .Release.Namespace }}
+    name: event-exporter

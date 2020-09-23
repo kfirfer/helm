@@ -1,0 +1,15 @@
+{{- if .Values.podSecurityPolicy.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "mysql-cluster.fullname" . }}-clusterrole
+rules:
+  - apiGroups:
+      - policy
+    resources:
+      - podsecuritypolicies
+    resourceNames:
+      - {{ include "mysql-cluster.fullname" . }}-psp
+    verbs:
+      - use
+{{- end }}

@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "mysqlcheck": {
+      "type": "object",
+      "title": "Configuration",
+      "form": true,
+      "properties": {
+        "user": {
+          "type": "string",
+          "title": "MySQL User",
+          "form": true
+        },
+        "password": {
+          "type": "string",
+          "title": "MySQL Password",
+          "form": true
+        },
+        "host": {
+          "type": "string",
+          "title": "MySQL Host",
+          "form": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+# Management
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-mgmd
+  labels:
+    app: mysql-mgmd
+spec:
+  clusterIP: None
+  ports:
+    - port: 1186
+  selector:
+    app: mysql-mgmd
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-data
+  labels:
+    app: mysql-data
+spec:
+  clusterIP: None
+  ports:
+    - port: 2202
+  selector:
+    app: mysql-data
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-server
+  labels:
+    app: mysql-server
+spec:
+  clusterIP: None
+  ports:
+    - port: 3306
+      name: mysql-server
+    - port: 33060
+      name: x-plugin
+  selector:
+    app: mysql-server
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-host
+  labels:
+    app: mysql-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+  selector:
+    app: mysql-server

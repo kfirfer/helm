@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-cluster-config
+data:
+  mysql-cluster.cnf: |
+    [tcp default]
+    SendBufferMemory=2M
+    ReceiveBufferMemory=2M
+
+    [ndbd default]
+    NoOfReplicas=3
+    LockPagesInMainMemory=1
+    DataMemory=256M
+    NoOfFragmentLogFiles=300
+    DataDir=/var/lib/mysql
+    MaxNoOfConcurrentOperations=100000
+    SchedulerSpinTimer=400
+    SchedulerExecutionTimer=100
+    RealTimeScheduler=0
+
+    TimeBetweenGlobalCheckpoints=1000
+    TimeBetweenEpochs=200
+    RedoBuffer=32M
+
+    MaxNoOfTables=1024
+    MaxNoOfOrderedIndexes=256
+
+    MaxNoOfConcurrentScans=500
+    MaxParallelScansPerFragment=500
+
+    [ndb_mgmd]
+    NodeId=1
+    hostname=mysql-mgmd-0.mysql-mgmd
+    datadir=/var/lib/mysql
+
+    [ndb_mgmd]
+    NodeId=2
+    hostname=mysql-mgmd-1.mysql-mgmd
+    datadir=/var/lib/mysql
+
+    [ndbd]
+    NodeId=3
+    hostname=mysql-data-0.mysql-data
+    datadir=/var/lib/mysql
+    LockExecuteThreadToCPU=1
+    LockMaintThreadsToCPU=0
+
+    [ndbd]
+    NodeId=4
+    hostname=mysql-data-1.mysql-data
+    datadir=/var/lib/mysql
+    LockExecuteThreadToCPU=1
+    LockMaintThreadsToCPU=0
+
+    [ndbd]
+    NodeId=5
+    hostname=mysql-data-2.mysql-data
+    datadir=/var/lib/mysql
+    LockExecuteThreadToCPU=1
+    LockMaintThreadsToCPU=0
+
+    [mysqld]
+    NodeId=6
+    hostname=mysql-server-0.mysql-server
+
+    [mysqld]
+    NodeId=7
+    hostname=mysql-server-1.mysql-server
+
+  my.cnf: |
+    [mysqld]
+    ndbcluster
+    ndb-connectstring=mysql-mgmd-0.mysql-mgmd,mysql-mgmd-1.mysql-mgmd
+    performance_schema=OFF
+    max_connections=2000
+
+    [mysql_cluster]
+    ndb-connectstring=mysql-mgmd-0.mysql-mgmd,mysql-mgmd-1.mysql-mgmd
+
+  my-server.cnf: |
+    [mysqld]
+    ndbcluster
+    ndb-connectstring=mysql-mgmd-0.mysql-mgmd,mysql-mgmd-1.mysql-mgmd
+    performance_schema=OFF
+    default_storage_engine=ndbcluster
+    max_connections=2000
+
+    [mysql_cluster]
+    ndb-connectstring=mysql-mgmd-0.mysql-mgmd,mysql-mgmd-1.mysql-mgmd
+
+  root-user.sql: |
+    CREATE USER 'test'@'%' IDENTIFIED WITH mysql_native_password BY 'testpassword';
+    GRANT ALL PRIVILEGES ON *.* TO 'test'@'%' WITH GRANT OPTION;
+    FLUSH PRIVILEGES;
+
+  waitforcurl.sh: |
+    #!/bin/sh
+
+    HOST=$1
+    CURL_EXIT_CODE=$2
+
+    while true
+    do
+    	curl ${HOST}
+    	exit_code=$?
+    	if test "$exit_code" == "${CURL_EXIT_CODE}"; then
+    	   break
+    	fi
+    	echo "exit code = ${exit_code}"
+    	sleep 1
+    done

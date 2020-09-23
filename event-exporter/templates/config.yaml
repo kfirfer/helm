@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "event-exporter.fullname" . }}-config
+  labels:
+    app.kubernetes.io/name: {{ include "event-exporter.name" . }}
+    helm.sh/chart: {{ include "event-exporter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  config.yaml: |
+    logLevel: error
+    logFormat: json
+    route:
+      routes:
+        - match:
+            - receiver: "dump"
+    receivers:
+      - name: "dump"
+        file:
+          path: "/dev/stdout"
+          layout:
+            createdAt: {{"{{ .GetTimestampMs }}" | quote}}
+            message: {{"{{ .Message }}" | quote}}
+            reason: {{"{{ .Reason }}" | quote}}
+            type: {{"{{ .Type }}" | quote}}
+            count: {{"{{ .Count }}" | quote}}
+            kind: {{"{{ .InvolvedObject.Kind }}" | quote}}
+            name: {{"{{ .InvolvedObject.Name }}" | quote}}
+            namespace: {{"{{ .Namespace }}" | quote}}
+            component: {{"{{ .Source.Component }}" | quote}}
+            host: {{"{{ .Source.Host }}" | quote}}
+            metadataName:  {{"{{ .Source.Host }}" | quote}}

@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "percona-xtradb-cluster.fullname" . }}
+  labels:
+    app: {{ template "percona-xtradb-cluster.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  {{- if .Values.service.percona.headless }}
+  clusterIP: None
+  {{- end }}
+  ports:
+  - name: mysql
+    port: 3306
+    targetPort: mysql
+    {{ if .Values.healthcheck }}
+  - name: healthcheck
+    port: 8081
+    targetPort: healthcheck
+    {{ end }}
+  - name: galera-repl
+    port: 4567
+    targetPort: galera-repl
+  - name: state-transfer
+    port: 4568
+    targetPort: state-transfer
+  - name: state-snapshot
+    port: 4444
+    targetPort: state-snapshot
+  selector:
+    app: {{ template "percona-xtradb-cluster.fullname" . }}
+    release: "{{ .Release.Name }}"

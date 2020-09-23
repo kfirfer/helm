@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "phpmyadmin.fullname" . }}-test-connection"
+  labels:
+    {{- include "phpmyadmin.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "phpmyadmin.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

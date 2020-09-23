@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-data
+spec:
+  selector:
+    matchLabels:
+      app: mysql-data
+  serviceName: mysql-data
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mysql-data
+    spec:
+      affinity:
+        {{- if eq .Values.antiAffinity "hard" }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - mysql-data
+              topologyKey: {{ .Values.antiAffinityTopologyKey }}
+        {{- else if eq .Values.antiAffinity "soft" }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                topologyKey: {{ .Values.antiAffinityTopologyKey }}
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - mysql-data
+      {{- end }}
+      containers:
+        - name: mysql-data
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: mysql-data
+              containerPort: 2202
+          volumeMounts:
+            - name: mysql-data-volumeclaim
+              mountPath: /var/lib/mysql
+              subPath: mysql
+            - name: mysql-cluster-config-cluster-cnf
+              mountPath: /etc/mysql-cluster.cnf
+              subPath: mysql-cluster.cnf
+            - name: mysql-cluster-config-my-cnf
+              mountPath: /etc/my.cnf
+              subPath: my.cnf
+            - name: waitforcurl
+              mountPath: /waitforcurl.sh
+              subPath: waitforcurl.sh
+          command:
+            - bash
+            - "-c"
+            - |
+              ./waitforcurl.sh mysql-server-0.mysql-server 7
+              ./waitforcurl.sh mysql-server-1.mysql-server 7
+
+              ./waitforcurl.sh mysql-data-0.mysql-data 7
+              ./waitforcurl.sh mysql-data-1.mysql-data 7
+              ./waitforcurl.sh mysql-data-2.mysql-data 7
+
+              ./waitforcurl.sh mysql-mgmd-0.mysql-mgmd 7
+              ./waitforcurl.sh mysql-mgmd-1.mysql-mgmd 7
+
+              ./entrypoint.sh ndbd
+      volumes:
+        - name: mysql-cluster-config-cluster-cnf
+          configMap:
+            name: mysql-cluster-config
+            items:
+              - key: mysql-cluster.cnf
+                path: mysql-cluster.cnf
+        - name: mysql-cluster-config-my-cnf
+          configMap:
+            name: mysql-cluster-config
+            items:
+              - key: my.cnf
+                path: my.cnf
+        - name: waitforcurl
+          configMap:
+            name: mysql-cluster-config
+            defaultMode: 0777
+            items:
+              - key: waitforcurl.sh
+                path: waitforcurl.sh
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-data-volumeclaim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-storage
+        resources:
+          requests:
+            storage: 10Gi
+

@@ -1,0 +1,18 @@
+mysqlRootPassword: "123123"
+
+image:
+  repository: mysql/mysql-cluster
+  tag: 8.0.20
+  pullPolicy: IfNotPresent
+
+# By default this will make sure two pods don't end up on the same node
+# Changing this to a region would allow you to spread pods across regions
+antiAffinityTopologyKey: "kubernetes.io/hostname"
+
+# Hard means that by default pods will only be scheduled if there are enough nodes for them
+# and that they will never end up on the same node. Setting this to soft will do this "best effort"
+antiAffinity: "soft"
+
+
+podSecurityPolicy:
+  create: false

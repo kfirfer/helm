@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-server
+spec:
+  selector:
+    matchLabels:
+      app: mysql-server
+  serviceName: mysql-server
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: mysql-server
+    spec:
+      affinity:
+        {{- if eq .Values.antiAffinity "hard" }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - mysql-server
+              topologyKey: {{ .Values.antiAffinityTopologyKey }}
+        {{- else if eq .Values.antiAffinity "soft" }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                topologyKey: {{ .Values.antiAffinityTopologyKey }}
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - mysql-server
+      {{- end }}
+      containers:
+        - name: mysql-server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: mysql-server
+              containerPort: 3306
+            - name: x-plugin
+              containerPort: 33060
+          volumeMounts:
+            - name: mysql-cluster-config-cluster-cnf
+              mountPath: /etc/mysql-cluster.cnf
+              subPath: mysql-cluster.cnf
+            - name: mysql-cluster-config-my-cnf
+              mountPath: /etc/my.cnf
+              subPath: my.cnf
+            - name: waitforcurl
+              mountPath: /waitforcurl.sh
+              subPath: waitforcurl.sh
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ .Values.mysqlRootPassword }}
+          command:
+            - bash
+            - "-c"
+            - |
+              ./waitforcurl.sh mysql-server-0.mysql-server 7
+              ./waitforcurl.sh mysql-server-1.mysql-server 7
+
+              ./waitforcurl.sh mysql-data-0.mysql-data 7
+              ./waitforcurl.sh mysql-data-1.mysql-data 7
+              ./waitforcurl.sh mysql-data-2.mysql-data 7
+
+              ./waitforcurl.sh mysql-mgmd-0.mysql-mgmd 7
+              ./waitforcurl.sh mysql-mgmd-1.mysql-mgmd 7
+
+              ./entrypoint.sh mysqld --ssl=0 --user=root
+      volumes:
+        - name: mysql-cluster-config-cluster-cnf
+          configMap:
+            name: mysql-cluster-config
+            items:
+              - key: mysql-cluster.cnf
+                path: mysql-cluster.cnf
+        - name: mysql-cluster-config-my-cnf
+          configMap:
+            name: mysql-cluster-config
+            items:
+              - key: my-server.cnf
+                path: my.cnf
+        - name: waitforcurl
+          configMap:
+            name: mysql-cluster-config
+            defaultMode: 0777
+            items:
+              - key: waitforcurl.sh
+                path: waitforcurl.sh

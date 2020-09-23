@@ -1,0 +1,6 @@
+image:
+  repository: opsgenie/kubernetes-event-exporter
+  tag: 0.9
+  imagePullPolicy: IfNotPresent
+
+resources: {}
