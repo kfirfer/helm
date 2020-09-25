@@ -33,7 +33,7 @@ mysqlDatabase: ""
 
 ## Configure pxc_strict_mode
 ## ref: https://www.percona.com/doc/percona-xtradb-cluster/LATEST/features/pxc-strict-mode.html
-pxc_strict_mode: PERMISSIVE
+pxcStrictMode: PERMISSIVE
 
 terminationGracePeriodSeconds: 5
 livenessProbe: false

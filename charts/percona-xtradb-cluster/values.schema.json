@@ -27,6 +27,12 @@
       "title": "Database name",
       "form": true
     },
+    "pxcStrictMode": {
+      "type": "string",
+      "description": "PXC Strict Mode is designed to avoid the use of experimental and unsupported features in Percona XtraDB Cluster. It performs a number of validations at startup and during runtime.",
+      "title": "PXC Strict Mode",
+      "form": true
+    },
     "resources": {
       "type": "object",
       "title": "Required Resources",
