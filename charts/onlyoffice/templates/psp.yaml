@@ -1,0 +1,29 @@
+{{- if .Values.podSecurityPolicy.create -}}
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ include "onlyoffice.fullname" . }}-psp
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  fsGroup:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'configMap'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  hostNetwork: false
+  hostPID: false
+  hostIPC: false
+  allowedCapabilities:
+    - MKNOD
+{{- end -}}
