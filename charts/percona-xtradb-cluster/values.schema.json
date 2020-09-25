@@ -61,17 +61,17 @@
     "affinity": {
       "type": "boolean",
       "form": true,
-      "title": "Enable"
+      "title": "affinity"
     },
     "livenessProbe": {
       "type": "boolean",
       "form": true,
-      "title": "Enable"
+      "title": "livenessProbe"
     },
     "readinessProbe": {
       "type": "boolean",
       "form": true,
-      "title": "Enable"
+      "title": "readinessProbe"
     }
   }
 }
