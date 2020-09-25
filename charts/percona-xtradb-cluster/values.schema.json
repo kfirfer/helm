@@ -46,7 +46,15 @@
     },
     "persistence": {
       "type": "object",
+      "form": true,
+      "title": "Persistence Volume",
       "properties": {
+        "enabled": {
+          "type": "boolean",
+          "form": true,
+          "title": "Use Persistent Volume",
+          "description": "Enable persistent volume instead emptyDir"
+        },
         "size": {
           "type": "string",
           "title": "Persistent Volume Size",
@@ -54,7 +62,11 @@
           "render": "slider",
           "sliderMin": 1,
           "sliderMax": 100,
-          "sliderUnit": "Gi"
+          "sliderUnit": "Gi",
+          "hidden": {
+            "value": false,
+            "path": "persistence/enabled"
+          }
         }
       }
     },
