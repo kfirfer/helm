@@ -23,6 +23,19 @@
           "form": true
         }
       }
+    },
+    "cronjob": {
+      "type": "object",
+      "title": "Configuration",
+      "form": true,
+      "properties": {
+        "schedule": {
+          "type": "string",
+          "title": "cron",
+          "form": true,
+          "description": "When to mysqlcheck. defaults At 04:00 every day"
+        }
+      }
     }
   }
 }
