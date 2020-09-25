@@ -21,7 +21,7 @@ cronjob:
   jobRestartPolicy: Never
 
 mysqlcheck:
-  host: haproxy
+  host: mysqlhost
   user: root
   password: rootpassword
 
