@@ -7,3 +7,5 @@ icon: https://3.bp.blogspot.com/-9_-b0nEDB94/XDeXlBAancI/AAAAAAAAEo0/T7V1-SK_MWc
 maintainers:
   - email: kfirfer@gmail.com
     name: kfir
+annotations:
+  category: Database
