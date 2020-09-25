@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "replicas": {
+      "type": "integer",
+      "form": true,
+      "title": "Number of Replicas",
+      "min": 1,
+      "max": 30
+    },
+    "mysqlRootPassword": {
+      "type": "string",
+      "title": "MySQL root password",
+      "form": true
+    },
+    "resources": {
+      "type": "object",
+      "title": "Required Resources",
+      "form": true,
+      "properties": {
+        "requests": {
+          "type": "object",
+          "properties": {
+            "memory": {
+              "type": "string",
+              "form": true,
+              "render": "slider",
+              "title": "Memory Request",
+              "sliderMin": 10,
+              "sliderMax": 50000,
+              "sliderUnit": "Mi"
+            },
+            "cpu": {
+              "type": "string",
+              "form": true,
+              "render": "slider",
+              "title": "CPU Request",
+              "sliderMin": 10,
+              "sliderMax": 50000,
+              "sliderUnit": "m"
+            }
+          }
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "type": "string",
+          "title": "Persistent Volume Size",
+          "form": true,
+          "render": "slider",
+          "sliderMin": 1,
+          "sliderMax": 5000,
+          "sliderUnit": "Gi"
+        }
+      }
+    },
+    "affinity": {
+      "type": "boolean",
+      "form": true,
+      "title": "Enable"
+    },
+    "livenessProbe": {
+      "type": "boolean",
+      "form": true,
+      "title": "Enable"
+    },
+    "readinessProbe": {
+      "type": "boolean",
+      "form": true,
+      "title": "Enable"
+    }
+  }
+}

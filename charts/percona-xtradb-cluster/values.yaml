@@ -72,7 +72,7 @@ podAnnotations: {}
 ##
 tolerations: []
 
-affinity: true
+affinity: false
 
 lifecycle:
   preStop:
@@ -136,11 +136,11 @@ prometheus:
   ## Are you using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/user-guides/getting-started.html)?
   operator:
     ## Setting to true will create Prometheus-Operator specific resources like ServiceMonitors
-    enabled: true
+    enabled: false
 
     ## Configures alerts for Prometheus to pick up
     prometheusRule:
-      enabled: true
+      enabled: false
 
       ## Labels to add to alerts
       labels: {}
