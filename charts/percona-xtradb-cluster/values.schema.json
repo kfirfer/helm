@@ -37,7 +37,7 @@
               "render": "slider",
               "title": "CPU Request",
               "sliderMin": 10,
-              "sliderMax": 100,
+              "sliderMax": 2000,
               "sliderUnit": "m"
             }
           }
