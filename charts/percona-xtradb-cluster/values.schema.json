@@ -11,7 +11,20 @@
     },
     "mysqlRootPassword": {
       "type": "string",
+      "description": "Specify password for root user. if not specified random password will generate",
       "title": "MySQL root password",
+      "form": true
+    },
+    "xtraBackupPassword": {
+      "type": "string",
+      "description": "Specify password for xtradb backup user. if not specified random password will generate",
+      "title": "MySQL xtrabackup user password",
+      "form": true
+    },
+    "mysqlDatabase": {
+      "type": "string",
+      "description": "Optional: Create a database",
+      "title": "Database name",
       "form": true
     },
     "resources": {
@@ -72,18 +85,15 @@
     },
     "affinity": {
       "type": "boolean",
+      "description": "ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
       "form": true,
       "title": "affinity"
     },
     "livenessProbe": {
       "type": "boolean",
+      "description": "Self healing. not recommended on production environment when it is a database",
       "form": true,
       "title": "livenessProbe"
-    },
-    "readinessProbe": {
-      "type": "boolean",
-      "form": true,
-      "title": "readinessProbe"
     }
   }
 }
