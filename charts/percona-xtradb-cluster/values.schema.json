@@ -28,7 +28,7 @@
               "render": "slider",
               "title": "Memory Request",
               "sliderMin": 10,
-              "sliderMax": 50000,
+              "sliderMax": 2000,
               "sliderUnit": "Mi"
             },
             "cpu": {
@@ -37,7 +37,7 @@
               "render": "slider",
               "title": "CPU Request",
               "sliderMin": 10,
-              "sliderMax": 50000,
+              "sliderMax": 100,
               "sliderUnit": "m"
             }
           }
@@ -53,7 +53,7 @@
           "form": true,
           "render": "slider",
           "sliderMin": 1,
-          "sliderMax": 5000,
+          "sliderMax": 100,
           "sliderUnit": "Gi"
         }
       }
