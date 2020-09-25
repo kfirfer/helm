@@ -12,12 +12,14 @@ keywords:
 - xtradb
 - galera
 - wsrep
-home: https://www.percona.com/
+home: https://github.com/kfirfer/helm/tree/master/charts/percona-xtradb-cluster
 icon: https://www.percona.com/sites/all/themes/percona2015/logo.png
 sources:
-- https://github.com/kubernetes/charts
+- https://www.percona.com/
 - https://github.com/percona-lab/percona-docker/
 maintainers:
 - name: kfirfer
   email: kfirfer@gmail.com
 engine: gotpl
+annotations:
+  category: Database
