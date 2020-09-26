@@ -18,7 +18,6 @@ bind_address = 0.0.0.0
 wsrep_cluster_address=gcomm://
 wsrep_provider=/usr/lib64/galera4/libgalera_smm.so
 wsrep_sst_method=xtrabackup-v2
-slow_query_log_file=/var/log/mysqld-slow.log
 log_output                          = file
 innodb_data_file_path               = ibdata1:10M:autoextend
 innodb_flush_log_at_trx_commit      = 0

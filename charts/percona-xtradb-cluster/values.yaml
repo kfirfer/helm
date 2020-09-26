@@ -167,7 +167,7 @@ prometheus:
 ## When set to true will create sidecar to tail mysql log
 logTail: true
 
-# Expose health check for external components, such as HAproxy
+# Expose health check sidecar container for external components, such as HAproxy
 healthcheck: true
 
 ssl:
