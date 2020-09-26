@@ -1,5 +1,5 @@
 ### HELM CHARTS
 # ¯¯¯¯¯¯¯¯
 
-helm.charts.percona-xtradb-cluster.install: ##
-	helm upgrade -i percona-xtradb-cluster charts/percona-xtradb-cluster --namespace=default
+helm.charts.install: ## var: name
+	helm upgrade -i ${name} charts/${name} --namespace=default
