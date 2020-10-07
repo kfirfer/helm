@@ -23,6 +23,9 @@ innodb_data_file_path               = ibdata1:10M:autoextend
 innodb_flush_log_at_trx_commit      = 0
 innodb_flush_method                 = O_DIRECT
 innodb_autoinc_lock_mode            = 2
+userstat                            = 0
+performance_schema                  = OFF
+information_schema_stats_expiry     = 360
 
 [client]
 socket=/tmp/mysql.sock
