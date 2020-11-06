@@ -48,7 +48,7 @@ spec:
           {{- end }}
           {{- with .Values.redis.password }}
           - name: REDIS_PASSWORD
-            value: {{ . }}
+            value: {{ . | quote }}
           {{- end }}
           {{- with .Values.redis.hosts }}
           - name: REDIS_HOSTS
