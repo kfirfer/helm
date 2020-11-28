@@ -24,16 +24,13 @@ serviceAccount:
   name: ""
 
 env:
-  - name: DISABLE_UPDATES
-    value: "true"
-  - name: SERVER_USER
-    value: "admin"
-  - name: SERVER_PASSWORD
-    value: "a123123"
-  - name: METRICS_RESOLUTION
-    value: "5s"
-  - name: DATA_RETENTION
-    value: "192h"
+  DISABLE_UPDATES: "true"
+  SERVER_USER: "admin"
+  METRICS_RESOLUTION: "5s"
+  DATA_RETENTION: "192h"
+
+secret:
+  SERVER_PASSWORD: "a123123"
 
 podAnnotations: {}
 
