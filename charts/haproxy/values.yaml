@@ -13,7 +13,7 @@ podSecurityContext:
   fsGroup: 2000
 
 securityContext:
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
 
