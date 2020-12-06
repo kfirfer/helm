@@ -8,7 +8,7 @@ image:
   repository: imega/mysql-client
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "10.4.13"
+  tag: "10.5.8"
 
 cronjob:
   # At 04:00 every day
