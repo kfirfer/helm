@@ -47,6 +47,9 @@ serviceAccount:
 securityContext:
   runAsUser: 16  # run as cron user instead of root
 
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+
 pod:
   annotations: {}
   labels: {}

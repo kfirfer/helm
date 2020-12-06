@@ -68,6 +68,8 @@ spec:
         {{- end }}
           containers:
             - name: {{ .Chart.Name }}
+              securityContext:
+                {{- toYaml .Values.containerSecurityContext | nindent 16 }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
 {{- if .Values.extraVolumeMounts }}
