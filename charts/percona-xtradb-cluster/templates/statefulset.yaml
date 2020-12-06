@@ -127,9 +127,11 @@ spec:
         - name: certificates
           mountPath: /cert
         {{- end }}
-      {{ if .Values.logTail }}
+      {{ if .Values.logTail.enabled }}
       - name: "logs"
         image: "busybox:1.25.0"
+        resources:
+          {{- toYaml .Values.logTail.resources | nindent 12 }}
         imagePullPolicy: IfNotPresent
         {{- with .Values.lifecycle }}
         lifecycle:
@@ -147,10 +149,15 @@ spec:
         - name: var-log
           mountPath: /var/log
       {{ end }}
-      {{ if .Values.healthcheck }}
+      {{ if .Values.healthcheck.enabled }}
       - name: "healthcheck"
-        image: "kfirfer/python:latest"
+        image: "{{ .Values.healthcheck.image }}:{{ .Values.healthcheck.tag }}"
         imagePullPolicy: IfNotPresent
+        resources:
+          {{- toYaml .Values.healthcheck.resources | nindent 12 }}
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
         env:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:

@@ -165,10 +165,16 @@ prometheus:
       #   prometheus: kube-prometheus
 
 ## When set to true will create sidecar to tail mysql log
-logTail: true
+logTail:
+  enabled: true
+  resources: {}
 
 # Expose health check sidecar container for external components, such as HAproxy
-healthcheck: true
+healthcheck:
+  enabled: true
+  image: kfirfer/percona-xtradb-healthcheck
+  tag: 0.0.1
+  resources: {}
 
 ssl:
   enabled: true
