@@ -96,10 +96,15 @@
       "title": "affinity"
     },
     "livenessProbe": {
-      "type": "boolean",
-      "description": "Self healing. not recommended on production environment when it is a database",
-      "form": true,
-      "title": "livenessProbe"
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Self healing. not recommended on production environment when it is a database",
+          "form": true,
+          "title": "enabled"
+        }
+      }
     }
   }
 }

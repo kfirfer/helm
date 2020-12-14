@@ -91,22 +91,28 @@ spec:
           containerPort: 4568
         - name: state-snapshot
           containerPort: 4444
-        {{ if .Values.livenessProbe }}
+        {{ if .Values.livenessProbe.enabled }}
         livenessProbe:
           exec:
             command:
               - "/bin/bash"
               - "-c"
               - "mysqladmin ping || test -e /var/lib/mysql/sst_in_progress"
-          initialDelaySeconds: 30
-          timeoutSeconds: 4
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
         {{ end }}
-        {{ if .Values.readinessProbe }}
+        {{ if .Values.readinessProbe.enabled }}
         readinessProbe:
           exec:
             command: ["mysql", "--defaults-extra-file=/root/.my.cnf", "-h", "127.0.0.1", "-e", "SELECT 1"]
-          initialDelaySeconds: 30
-          timeoutSeconds: 2
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
         {{ end }}
         {{- with .Values.lifecycle }}
         lifecycle:
@@ -129,7 +135,7 @@ spec:
         {{- end }}
       {{ if .Values.logTail.enabled }}
       - name: "logs"
-        image: "busybox:1.25.0"
+        image: "busybox:1.32.0"
         resources:
           {{- toYaml .Values.logTail.resources | nindent 12 }}
         imagePullPolicy: IfNotPresent
@@ -253,18 +259,22 @@ spec:
         ports:
           - name: metrics
             containerPort: 9104
+        {{ if .Values.metrics.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
             path: /
             port: metrics
           initialDelaySeconds: {{ .Values.metrics.livenessProbe.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.metrics.livenessProbe.timeoutSeconds }}
+        {{ end }}
+        {{ if .Values.metrics.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
             path: /
             port: metrics
           initialDelaySeconds: {{ .Values.metrics.readinessProbe.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.metrics.readinessProbe.timeoutSeconds }}
+        {{ end }}
         {{- with .Values.lifecycle }}
         lifecycle:
         {{- toYaml . | nindent 10 }}

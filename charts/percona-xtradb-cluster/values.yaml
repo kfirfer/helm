@@ -36,8 +36,22 @@ mysqlDatabase: ""
 pxcStrictMode: PERMISSIVE
 
 terminationGracePeriodSeconds: 5
-livenessProbe: false
-readinessProbe: true
+
+livenessProbe:
+  enabled: false
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 6
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
 
 updateStrategy: RollingUpdate
 
@@ -102,9 +116,11 @@ metrics:
     prometheus.io/scrape: "true"
     prometheus.io/port: "9104"
   livenessProbe:
+    enabled: false
     initialDelaySeconds: 60
     timeoutSeconds: 5
   readinessProbe:
+    enabled: false
     initialDelaySeconds: 30
     timeoutSeconds: 2
   flags:
