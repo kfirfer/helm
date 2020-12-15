@@ -30,9 +30,7 @@ spec:
 {{ toYaml .Values.volumeClaimTemplate | indent 6 }}
   {{- end }}
   serviceName: {{ include "pmm-server.fullname" . }}
-{{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-{{- end }}
   selector:
     matchLabels:
       {{- include "pmm-server.selectorLabels" . | nindent 6 }}
@@ -94,15 +92,17 @@ spec:
               mountPath: /usr/tmp
               subPath: {{ ternary "tmp" (printf "%s/%s" .Values.persistence.subPath "tmp") (empty .Values.persistence.subPath) }}
             {{- end }}
+          {{ if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              port: 9090
-              path: /prometheus/-/ready
-            failureThreshold: 3
-            periodSeconds: 5
-            initialDelaySeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 3
+              port: 80
+              path: /ping
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{ end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

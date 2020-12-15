@@ -8,7 +8,7 @@ image:
   repository: percona/pmm-server
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.9.1"
+  tag: "2.12.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -45,6 +45,14 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
 service:
   type: ClusterIP
   port: 4431
@@ -70,13 +78,6 @@ resources: {}
 #  limits:
 #    cpu: 3
 #    memory: 4Gi
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
 
