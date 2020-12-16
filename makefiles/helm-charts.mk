@@ -1,5 +1,5 @@
 ### HELM CHARTS
 # ¯¯¯¯¯¯¯¯
 
-helm.charts.install: ## var: name
-	helm upgrade -i ${name} charts/${name} --namespace=default
+helm.charts.install: ## var: chart,releasename
+	helm upgrade -i ${releasename} charts/${chart} --namespace=default
