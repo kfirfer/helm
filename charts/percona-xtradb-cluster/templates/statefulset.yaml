@@ -304,8 +304,7 @@ spec:
         secret:
           secretName: {{ .Values.ssl.secret }}
       {{- end }}
-      {{- if .Values.affinity }}
-      affinity:
+        {{- if eq .Values.antiAffinity "hard" }}
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
@@ -313,8 +312,20 @@ spec:
                   - key: app
                     operator: In
                     values:
-                      - {{ template "percona-xtradb-cluster.fullname" . }}
-              topologyKey: "kubernetes.io/hostname"
+                      - "{{ template "percona-xtradb-cluster.fullname" . }}"
+              topologyKey: {{ .Values.antiAffinityTopologyKey }}
+        {{- else if eq .Values.antiAffinity "soft" }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                topologyKey: {{ .Values.antiAffinityTopologyKey }}
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - "{{ template "percona-xtradb-cluster.fullname" . }}"
       {{- end }}
       {{- if .Values.tolerations }}
       tolerations:
