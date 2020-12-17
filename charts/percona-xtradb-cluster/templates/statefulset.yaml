@@ -304,7 +304,8 @@ spec:
         secret:
           secretName: {{ .Values.ssl.secret }}
       {{- end }}
-        {{- if eq .Values.antiAffinity "hard" }}
+      affinity:
+      {{- if eq .Values.antiAffinity "hard" }}
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
@@ -326,7 +327,7 @@ spec:
                       operator: In
                       values:
                         - "{{ template "percona-xtradb-cluster.fullname" . }}"
-      {{- end }}
+        {{- end }}
       {{- if .Values.tolerations }}
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
