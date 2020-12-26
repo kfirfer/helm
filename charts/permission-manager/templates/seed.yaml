@@ -7,6 +7,17 @@ rules:
     resources: [ "*" ]
     verbs: [ "list" ]
 
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___read-list-apprepositories
+rules:
+  - apiGroups: [ "*" ]
+    resources:
+      - "apprepositories"
+    verbs: [ "list" ]
 
 ---
 
@@ -24,7 +35,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: template-namespaced-resources___master
+  name: template-namespaced-resources___admin
 rules:
   - apiGroups: [ "*" ]
     resources: [ "*" ]

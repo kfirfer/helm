@@ -5,7 +5,7 @@ metadata:
   labels:
     app: permission-manager
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
       app: permission-manager
@@ -14,9 +14,13 @@ spec:
       labels:
         app: permission-manager
     spec:
+      securityContext:
+{{ toYaml .Values.podSecurityContext | indent 8 }}
       serviceAccountName: permission-manager
       containers:
         - name: permission-manager
+          securityContext:
+{{ toYaml .Values.securityContext | indent 12 }}
           image: quay.io/sighup/permission-manager:v1.6.0
           ports:
             - containerPort: {{ .Values.service.port }}
@@ -25,3 +29,8 @@ spec:
                 name: permission-manager
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+      {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+

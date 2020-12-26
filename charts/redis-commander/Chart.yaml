@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis-commander
 description: A Helm chart for redis-commander
 type: application
-version: 0.0.2
+version: 0.0.3
 appVersion: latest
 annotations:
   category: Database

@@ -65,6 +65,7 @@ spec:
 {{- end }}
         {{- if .Values.rbac.enabled }}
           serviceAccountName: {{ template "mysql-check.serviceAccountName" .}}
+          automountServiceAccountToken: {{ .Values.serviceAccount.automountToken }}
         {{- end }}
           containers:
             - name: {{ .Chart.Name }}

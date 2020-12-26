@@ -18,7 +18,10 @@ podSecurityPolicy:
 #    - pathPrefix: "/mnt/Movies"
 
 serviceAccount:
-  create: true
+  create: false
+  ## opt in/out of automounting API credentials into container
+  ## https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  automountToken: false
 
 service:
   type: ClusterIP
