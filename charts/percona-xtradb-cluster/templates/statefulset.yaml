@@ -31,6 +31,7 @@ spec:
       {{- with .Values.serviceAccountName }}
       serviceAccountName: "{{ . }}"
       {{- end }}
+      automountServiceAccountToken: false
       {{- with .Values.securityContext }}
       securityContext:
         {{ . | toYaml | nindent 8 }}
