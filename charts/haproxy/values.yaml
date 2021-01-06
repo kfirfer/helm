@@ -9,6 +9,17 @@ imagePullSecrets: {}
 nameOverride: ""
 fullnameOverride: ""
 
+ingress:
+  enabled: false
+  annotations: {}
+  path: /
+  hosts:
+    - "haproxy.example.com"
+  tls: []
+#    - hosts:
+#        - "haproxy.example.com"
+#      secretName: secret-tls
+
 podSecurityContext:
   fsGroup: 2000
 

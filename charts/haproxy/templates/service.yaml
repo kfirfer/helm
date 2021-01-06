@@ -10,10 +10,10 @@ spec:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.port }}
       protocol: TCP
-      name: http
+      name: tcp-port
     - port: 8899
       targetPort: 8899
       protocol: TCP
-      name: web
+      name: http-web-port
   selector:
     {{- include "haproxy.selectorLabels" . | nindent 4 }}

@@ -12,4 +12,4 @@ maintainers:
 - email: kfirfer@gmail.com
   name: kfir
 name: haproxy
-version: 0.0.7
+version: 0.0.8

@@ -39,10 +39,10 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           ports:
-            - name: http
+            - name: tcp-port
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-            - name: web
+            - name: http-web-port
               containerPort: 8899
               protocol: TCP
           resources:
