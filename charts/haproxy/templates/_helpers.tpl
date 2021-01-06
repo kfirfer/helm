@@ -51,6 +51,7 @@ Selector labels
 {{- define "haproxy.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "haproxy.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app: {{ include "haproxy.name" . }}
 {{- end -}}
 
 {{/*
