@@ -49,6 +49,7 @@ Selector labels
 {{- define "redis-commander.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "redis-commander.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app: {{ include "redis-commander.name" . }}
 {{- end }}
 
 {{/*
