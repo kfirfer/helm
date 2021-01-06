@@ -17,6 +17,10 @@ spec:
     metadata:
       labels:
         {{- include "haproxy.selectorLabels" . | nindent 8 }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+      {{- end }}
     spec:
       automountServiceAccountToken: true
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}

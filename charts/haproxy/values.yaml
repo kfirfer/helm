@@ -9,6 +9,9 @@ imagePullSecrets: {}
 nameOverride: ""
 fullnameOverride: ""
 
+# Annotations to be added to pods
+podAnnotations: {}
+
 ingress:
   enabled: false
   annotations: {}
