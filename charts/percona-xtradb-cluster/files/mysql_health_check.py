@@ -9,6 +9,8 @@ MYSQL_ROOT_PASSWORD = os.environ["MYSQL_ROOT_PASSWORD"]
 
 class MysqlHealthCheck(BaseHTTPRequestHandler):
 
+    protocol_version = 'HTTP/1.1'
+
     def do_GET(self):
         db = None
         try:
