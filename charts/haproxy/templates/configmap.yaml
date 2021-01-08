@@ -43,7 +43,7 @@ data:
     backend mysql-cluster-back
       mode tcp
       option tcplog
-      option httpchk GET / HTTP/1.0
+      option httpchk GET / HTTP/1.1
       balance roundrobin
       {{ .Values.haConfig.healthcheck }}
       {{- $namespace := .Release.Namespace }}
