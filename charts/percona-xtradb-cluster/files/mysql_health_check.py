@@ -37,10 +37,12 @@ class MysqlHealthCheck(BaseHTTPRequestHandler):
             if db:
                 db.close()
 
+        response_body = bytes(message, "utf-8")
         self.send_response_only(code)
         self.send_header('Content-type', 'text/html')
+        self.send_header('Content-Length', "{}".format(len(response_body)))
         self.end_headers()
-        self.wfile.write(bytes(message, "utf-8"))
+        self.wfile.write(response_body)
 
 
 def run():
