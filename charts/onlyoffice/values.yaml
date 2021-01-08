@@ -33,11 +33,12 @@ ingress:
 podSecurityPolicy:
   create: true
 
-securitycontext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    add:
-      - MKNOD
+securitycontext: {}
+#  allowPrivilegeEscalation: false
+#  capabilities:
+#    add:
+#      - MKNOD
+
 
 secretKey: someverysecurepassword
 
