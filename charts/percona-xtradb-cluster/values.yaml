@@ -401,9 +401,12 @@ service:
   percona:
     headless: true
 
-## Set the serviceAccountName.
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-# serviceAccountName:
+serviceAccount:
+  ## Set the serviceAccountName.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  # serviceAccountName:
+
+  automountToken: false
 
 ## Set the securityContext parameters.
 ## 1001 is the UID of mysql user.
