@@ -16,7 +16,7 @@ spec:
         app: {{ template "mysqldump.fullname" . }}-dataaccess
       {{- if .Values.podAnnotations }}
       annotations:
-      {{ toYaml .Values.podAnnotations | indent 8 }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
       {{- end }}
     spec:
       {{- if .Values.securityContext.enabled }}
