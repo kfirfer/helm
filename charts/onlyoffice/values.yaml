@@ -69,3 +69,8 @@ readinessProbe:
   failureThreshold: 3
   scheme: HTTP
   path: /healthcheck
+
+
+serviceAccount:
+  automountToken: true
+

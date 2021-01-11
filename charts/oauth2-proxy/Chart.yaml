@@ -14,4 +14,4 @@ kubeVersion: '>=1.9.0-0'
 name: oauth2-proxy
 sources:
 - https://github.com/pusher/oauth2_proxy
-version: 3.3.0
+version: 3.3.1

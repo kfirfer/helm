@@ -80,7 +80,7 @@ serviceAccount:
   annotations: {}
   ## opt in/out of automounting API credentials into container
   ## https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-  automountToken: false
+  automountToken: true
 
 ingress:
   enabled: false
