@@ -74,3 +74,4 @@ readinessProbe:
 serviceAccount:
   automountToken: true
 
+podAnnotations: {}
