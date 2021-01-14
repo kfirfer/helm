@@ -232,7 +232,7 @@ spec:
             pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml &
             while true
             do
-            (pmm-admin add mysql --query-source=slowlog --username=$DB_USER --password=$DB_PASSWORD && sleep infinity) || (echo "sleeping for 5 seconds" && sleep 5)
+            (pmm-admin add mysql --query-source=slowlog --username=$DB_USER --password=$DB_PASSWORD && sleep infinity) || (echo "sleeping for 10 seconds" && sleep 10)
             done
       {{- end }}
       {{- if .Values.metrics.enabled }}
