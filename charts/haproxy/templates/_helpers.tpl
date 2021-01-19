@@ -27,8 +27,6 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "haproxy.labels" -}}
-app.kubernetes.io/name: {{ include "haproxy.chart" . }}
-app: {{ include "haproxy.chart" . }}
 helm.sh/chart: {{ include "haproxy.chart" . }}
 {{ include "haproxy.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
