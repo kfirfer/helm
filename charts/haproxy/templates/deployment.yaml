@@ -93,7 +93,7 @@ spec:
                   - key: app.kubernetes.io/name
                     operator: In
                     values:
-                      - "{{ template "haproxy.fullname" . }}"
+                      - "{{ template "haproxy.name" . }}"
               topologyKey: {{ .Values.antiAffinityTopologyKey }}
         {{- else if eq .Values.antiAffinity "soft" }}
         podAntiAffinity:
@@ -106,7 +106,7 @@ spec:
                     - key: app.kubernetes.io/name
                       operator: In
                       values:
-                        - "{{ template "haproxy.fullname" . }}"
+                        - "{{ template "haproxy.name" . }}"
       {{- end }}
       {{- end }}
     {{- with .Values.tolerations }}
