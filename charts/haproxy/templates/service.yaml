@@ -15,5 +15,11 @@ spec:
       targetPort: 8899
       protocol: TCP
       name: http-web-port
+    {{- if .Values.metrics.enabled }}
+    - name: {{ .Values.metrics.portName }}
+      port: {{ .Values.metrics.port }}
+      protocol: TCP
+      targetPort: metrics-port
+    {{- end }}
   selector:
     {{- include "haproxy.selectorLabels" . | nindent 4 }}

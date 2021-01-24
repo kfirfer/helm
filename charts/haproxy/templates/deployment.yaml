@@ -17,8 +17,13 @@ spec:
     metadata:
       labels:
         {{- include "haproxy.selectorLabels" . | nindent 8 }}
-      {{- if .Values.podAnnotations }}
       annotations:
+        {{- if .Values.metrics.enabled }}
+        prometheus.io/port: "{{ .Values.metrics.port }}"
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "{{ .Values.metrics.scrapePath }}"
+        {{- end }}
+      {{- if .Values.podAnnotations }}
 {{ toYaml .Values.podAnnotations | indent 8 }}
       {{- end }}
     spec:
@@ -49,6 +54,10 @@ spec:
             - name: http-web-port
               containerPort: 8899
               protocol: TCP
+            {{- if .Values.metrics.enabled }}
+            - name: metrics-port
+              containerPort: {{ default "9101" .Values.metrics.port }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{ if .Values.livenessProbe.enabled }}

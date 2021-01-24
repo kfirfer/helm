@@ -65,3 +65,11 @@ data:
       stats realm Strictly\ Private
       stats auth {{ .Values.haConfig.stats.user }}:{{ .Values.haConfig.stats.password }}
       stats admin if TRUE
+
+    {{- if .Values.metrics.enabled }}
+    frontend metrics
+      mode http
+      bind *:{{ .Values.metrics.port }}
+      option http-use-htx
+      http-request use-service prometheus-exporter if { path {{ .Values.metrics.scrapePath }} }
+    {{- end }}

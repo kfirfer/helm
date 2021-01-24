@@ -87,6 +87,13 @@ antiAffinity: "soft"
 # Only used if you choose soft
 weight: 1
 
+metrics:
+  enabled: false
+  # prometheus port & scrape path
+  port: 9101
+  portName: http-exporter-port
+  scrapePath: /metrics
+
 antiAffinityTopologyKey: "kubernetes.io/hostname"
 
 haConfig:
