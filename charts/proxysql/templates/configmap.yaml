@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+data:
+  proxysql.cnf: |
+    datadir="{{ .Values.proxysql.dataDir }}"
+
+    admin_variables =
+    {
+      admin_credentials="{{ .Values.proxysql.admin.username}}:{{ .Values.proxysql.admin.password }}"
+      mysql_ifaces="{{ .Values.proxysql.admin.iface }}:{{ .Values.proxysql.admin.port }}"
+      refresh_interval=2000
+      web_enabled={{ .Values.proxysql.webEnabled }}
+      web_port=6080
+      stats_credentials="stats:admin"
+    }
+
+    mysql_variables =
+    {
+        threads=8
+        max_connections=2048
+        default_query_delay=0
+        default_query_timeout=36000000
+        have_compress=true
+        poll_timeout=2000
+        interfaces="{{ .Values.mysql.iface }}:{{ .Values.mysql.port }};/tmp/proxysql.sock"
+        default_schema="information_schema"
+        stacksize=1048576
+        server_version="{{ .Values.mysql.version }}"
+        connect_timeout_server=10000
+        monitor_history=60000
+        monitor_connect_interval=200000
+        monitor_ping_interval=200000
+        ping_interval_server_msec=10000
+        ping_timeout_server=200
+        commands_stats=true
+        sessions_sort=true
+        monitor_username="{{ .Values.mysql.monitor.username }}"
+        monitor_password="{{ .Values.mysql.monitor.password }}"
+        monitor_galera_healthcheck_interval=2000
+        monitor_galera_healthcheck_timeout=800
+        set_query_lock_on_hostgroup=0
+    }
+
+    proxysql_servers =
+    (
+{{- $root := . }}
+{{- range $i, $e := until (int .Values.numReplicas) }}
+        {
+            hostname="{{ template "fullname" $root }}-announce-{{ $e }}"
+            port={{ $.Values.proxysql.admin.port }}
+            weight=1
+            comment="{{ template "fullname" $root }}-announce-{{ $e }}"
+        }{{- if ne (int $root.Values.numReplicas) (add $e 1) -}},{{- end -}}
+{{- end }}
+    )
+
+{{ .Values.proxysql.additionConfig | indent 4 }}
