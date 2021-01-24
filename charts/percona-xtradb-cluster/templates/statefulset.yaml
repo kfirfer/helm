@@ -281,7 +281,7 @@ spec:
         {{- toYaml . | nindent 10 }}
         {{- end }}
         resources:
-      {{ toYaml .Values.metrics.resources | indent 10 }}
+{{ toYaml .Values.metrics.resources | indent 10 }}
       {{- end }}
       volumes:
       - name: pmm-config
