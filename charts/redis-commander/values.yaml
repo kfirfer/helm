@@ -96,3 +96,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+lifecycle: {}
+#  preStop:
+#    exec:
+#      command: ["/bin/sh", "-c", "sleep 3"]
+
