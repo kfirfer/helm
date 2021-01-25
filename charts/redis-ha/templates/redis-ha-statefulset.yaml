@@ -28,7 +28,7 @@ spec:
       {{- if .Values.podAnnotations }}
 {{ toYaml .Values.podAnnotations | indent 8 }}
       {{- end }}
-      {{- if .Values.exporter.enabled and not .Values.exporter.serviceMonitor.enabled }}
+      {{- if and (not .Values.exporter.serviceMonitor.enabled) (.Values.exporter.enabled)  }}
         prometheus.io/port: "{{ .Values.exporter.port }}"
         prometheus.io/scrape: "true"
         prometheus.io/path: {{ .Values.exporter.scrapePath }}
