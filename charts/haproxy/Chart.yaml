@@ -1,7 +1,7 @@
 annotations:
   category: Database
 apiVersion: v2
-appVersion: 2.2.7
+appVersion: 2.2.8
 description: Fast, reliable, scalable, and easy to use proxy
 home: https://github.com/kfirfer/helm/tree/master/charts/haproxy
 icon: https://res-3.cloudinary.com/crunchbase-production/image/upload/c_lpad,h_256,w_256,f_auto,q_auto:eco/yroykjzjfi8lmeam58xp
@@ -12,4 +12,4 @@ maintainers:
 - email: kfirfer@gmail.com
   name: kfir
 name: haproxy
-version: 0.0.16
+version: 0.0.17
