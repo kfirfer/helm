@@ -18,11 +18,6 @@ spec:
       labels:
         {{- include "haproxy.selectorLabels" . | nindent 8 }}
       annotations:
-        {{- if .Values.metrics.enabled }}
-        prometheus.io/port: "{{ .Values.metrics.port }}"
-        prometheus.io/scrape: "true"
-        prometheus.io/path: "{{ .Values.metrics.scrapePath }}"
-        {{- end }}
       {{- if .Values.podAnnotations }}
 {{ toYaml .Values.podAnnotations | indent 8 }}
       {{- end }}

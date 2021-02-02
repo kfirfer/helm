@@ -93,6 +93,15 @@ metrics:
   port: 9101
   portName: http-exporter-port
   scrapePath: /metrics
+  serviceMonitor:
+    enabled: false
+    ## Specify a namespace if needed
+    ##
+    namespace:
+    ## fallback to the prometheus default unless specified
+    ##
+    interval:
+
 
 antiAffinityTopologyKey: "kubernetes.io/hostname"
 
