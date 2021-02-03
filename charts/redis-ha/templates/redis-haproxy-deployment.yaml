@@ -26,7 +26,7 @@ spec:
         {{ $key }}: {{ $value | toString }}
         {{- end }}
       annotations:
-      {{- if .Values.haproxy.metrics.enabled }}
+      {{- if and (not .Values.haproxy.metrics.serviceMonitor.enabled) (.Values.haproxy.metrics.enabled)  }}
         prometheus.io/port: "{{ .Values.haproxy.metrics.port }}"
         prometheus.io/scrape: "true"
         prometheus.io/path: "{{ .Values.haproxy.metrics.scrapePath }}"
