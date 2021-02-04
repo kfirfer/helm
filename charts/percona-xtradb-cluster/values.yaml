@@ -177,10 +177,10 @@ prometheus:
     ## Configures targets for Prometheus to pick up
     serviceMonitor:
       ## Interval at which Prometheus will scrape metrics exporter
-      interval: 10s
+      interval: 30s
 
       ## Namespace which Prometheus is installed in
-      namespace: kube-system
+      namespace: ""
 
       ## Label Selector for Prometheus to find ServiceMonitors
       # selector:
