@@ -20,4 +20,4 @@ sources:
 - https://redis.io/download
 - https://github.com/scality/Zenko/tree/development/1.0/kubernetes/zenko/charts/redis-ha
 - https://github.com/oliver006/redis_exporter
-version: 4.10.18
+version: 4.10.19
