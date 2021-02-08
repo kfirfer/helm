@@ -58,7 +58,7 @@ haproxy:
   replicas: 3
   image:
     repository: haproxy
-    tag: 2.2.8-alpine
+    tag: 2.2.8
     pullPolicy: IfNotPresent
 
   ## Custom labels for the haproxy pod
