@@ -212,17 +212,17 @@ if you see
 ```
 
 Debug container:
-```
+```bash
 kubectl debug percona-xtradb-cluster-pxc-0 -it --copy-to=percona-xtradb-cluster-pxc-0-debug --container=database -- sh
 ```
 
 When pending:
-```
+```bash
 kubectl delete pod percona-xtradb-cluster-pxc-0 --force
 ```
 
 In the debug container:
-```
+```bash
 sed -i -e 's/safe_to_bootstrap: 0/safe_to_bootstrap: 1/g' /var/lib/mysql/grastate.dat
 ```
 
