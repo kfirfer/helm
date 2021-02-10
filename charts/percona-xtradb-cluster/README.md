@@ -200,3 +200,30 @@ Depending on the actual mode you select, upon encountering a failed validation, 
 By default, PXC Strict Mode is set to ENFORCING, except if the node is acting as a standalone server or the node is bootstrapping, then PXC Strict Mode defaults to DISABLED.
 
 Source: https://www.percona.com/doc/percona-xtradb-cluster/LATEST/features/pxc-strict-mode.html
+
+
+## Bootstrap cluster from disaster
+
+Kill all pods
+
+if you see
+```
+[percona-xtradb-cluster-pxc-0 logs] 2020-12-25T05:31:19.259043Z 0 [ERROR] [MY-000000] [Galera] It may not be safe to bootstrap the cluster from this node. It was not the last one to leave the cluster and may not contain all the updates. To force cluster bootstrap with this node, edit the grastate.dat file manually and set safe_to_bootstrap to 1 . 
+```
+
+Debug container:
+```
+kubectl debug percona-xtradb-cluster-pxc-0 -it --copy-to=percona-xtradb-cluster-pxc-0-debug --container=database -- sh
+```
+
+When pending:
+```
+kubectl delete pod percona-xtradb-cluster-pxc-0 --force
+```
+
+In the debug container:
+```
+sed -i -e 's/safe_to_bootstrap: 0/safe_to_bootstrap: 1/g' /var/lib/mysql/grastate.dat
+```
+
+kubectl delete pod percona-xtradb-cluster-pxc-0-debug
