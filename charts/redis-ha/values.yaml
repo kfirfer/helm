@@ -3,7 +3,7 @@
 ##
 image:
   repository: redis
-  tag: 6.0.10-alpine
+  tag: 6.0.11-alpine
   pullPolicy: IfNotPresent
 
 ## Reference to one or more secrets to be used when pulling images
@@ -178,6 +178,10 @@ podSecurityPolicy:
 rbac:
   create: true
 
+# NOT RECOMMENDED: Additional container in which you can execute arbitrary commands to update sysctl parameters
+# You can now use securityContext.sysctls to leverage this capability
+# Ref: https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/
+##
 sysctlImage:
   enabled: false
   command: []
@@ -207,8 +211,20 @@ redis:
   ## It is possible to disable client side certificates authentication when "authClients" is set to "no"
   # authClients: "no"
 
+  ## Increase terminationGracePeriodSeconds to allow writing large RDB snapshots. (k8s default is 30s)
+  ## https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination-forced
+  terminationGracePeriodSeconds: 60
+
   # liveness probe parameters for redis container
   livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 15
+    timeoutSeconds: 15
+    successThreshold: 1
+    failureThreshold: 5
+
+  readinessProbe:
     enabled: true
     initialDelaySeconds: 30
     periodSeconds: 15
@@ -249,6 +265,11 @@ redis:
 
   ## annotations for the redis statefulset
   annotations: {}
+
+  ## updateStrategy for Redis StatefulSet
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+  updateStrategy:
+    type: RollingUpdate
 
 ## Sentinel specific configuration options
 sentinel:
@@ -315,6 +336,13 @@ securityContext:
   runAsUser: 1000
   fsGroup: 1000
   runAsNonRoot: true
+
+  ## Assuming your kubelet allows it, you can the following instructions to configure
+  ## specific sysctl parameters
+  ##
+  # sysctls:
+  # - name: net.core.somaxconn
+  #   value: '10000'
 
 ## Node labels, affinity, and tolerations for pod assignment
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
