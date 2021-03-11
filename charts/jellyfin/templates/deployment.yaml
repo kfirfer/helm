@@ -53,6 +53,8 @@ spec:
             {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+          securityContext:
+{{ toYaml .Values.securityContext | indent 12}}
       volumes:
       - name: config
       {{- if .Values.persistence.config.enabled }}
