@@ -113,6 +113,8 @@ affinity: {}
 
 podAnnotations: {}
 
+securityContext: {}
+
 extraVolumes: []
 #  - name: nas-movies
 #    hostPath:
