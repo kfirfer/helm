@@ -19,4 +19,4 @@ sources:
 - https://redis.io/download
 - https://github.com/DandyDeveloper/charts/blob/master/charts/redis-ha
 - https://github.com/oliver006/redis_exporter
-version: 4.12.8
+version: 4.12.9

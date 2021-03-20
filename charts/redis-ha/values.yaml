@@ -64,6 +64,12 @@ haproxy:
   ## Custom labels for the haproxy pod
   labels: {}
 
+  ## Node labels, affinity, and tolerations for pod assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  nodeSelector: {}
+
   livenessProbe:
     enabled: true
     initialDelaySeconds: 5

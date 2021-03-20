@@ -41,7 +41,7 @@ spec:
       serviceAccountName: {{ template "redis-ha.serviceAccountName" . }}-haproxy
       {{ end }}
       nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
+{{ toYaml .Values.haproxy.nodeSelector | indent 8 }}
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
       affinity:
