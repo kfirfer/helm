@@ -1,20 +1,28 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "jellyfin.fullname" . -}}
-{{- $ingressPath := .Values.ingress.path -}}
+{{- $serviceName := include "jellyfin.fullname" . -}}
+{{- $labels := include "jellyfin.labels" . -}}
+{{- $commonAnnotations := .Values.ingress.commonAnnotations -}}
+{{- range $val := .Values.ingress.ingresses }}
+---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ $val.name }}
   labels:
-{{- include "jellyfin.labels" . | nindent 4 }}
-{{- with .Values.ingress.annotations }}
+{{- $labels | nindent 4 }}
+{{ if or $commonAnnotations $val.annotations }}
   annotations:
+{{ end }}
+{{- with $commonAnnotations }}
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- with $val.annotations }}
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-{{- if .Values.ingress.tls }}
+{{- if $val.tls }}
   tls:
-  {{- range .Values.ingress.tls }}
+  {{- range $val.tls }}
     - hosts:
       {{- range .hosts }}
         - {{ . | quote }}
@@ -23,13 +31,14 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-  {{- range .Values.ingress.hosts }}
+  {{- range $val.hosts }}
     - host: {{ . | quote }}
       http:
         paths:
-          - path: {{ $ingressPath }}
+          - path: {{ $val.path }}
             backend:
-              serviceName: {{ $fullName }}
+              serviceName: {{ $serviceName }}
               servicePort: http
   {{- end }}
+{{- end }}
 {{- end }}

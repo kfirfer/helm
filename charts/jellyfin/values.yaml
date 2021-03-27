@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: jellyfin/jellyfin
-  tag: 10.6.4
+  tag: 10.7.1
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -44,16 +44,21 @@ service:
   ## Set the externalTrafficPolicy in the Service to either Cluster or Local
   # externalTrafficPolicy: Cluster
 
+
 ingress:
   enabled: false
-  annotations: {}
-  path: /
-  hosts:
-    - "jellyfin.example.com"
-  tls: []
-#    - hosts:
-#        - "jellyfin.example.com"
-#      secretName: secret-tls
+  commonAnnotations: {}
+  ingresses: []
+#    - name: "jellyfin-ingress-1"
+#      annotations: {}
+#      path: /
+#      hosts: []
+#        - "videos.pica.co.il"
+#        - "videos.tatzan.com"
+#      tls: []
+#        - hosts:
+#            - "*.pica.co.il"
+#            - "*.tatzan.com"
 
 persistence:
   config:
