@@ -4,7 +4,7 @@
 ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
 image:
   repository: "percona/percona-xtradb-cluster"
-  tag: "8.0.21-12.1"
+  tag: "8.0.22-13.1"
   pullPolicy: IfNotPresent
 
 # Desired number of members of xtradb cluster
@@ -64,7 +64,7 @@ command:
 allowRootFrom: "%"
 
 persistence:
-  enabled: false
+  enabled: true
   ## percona data Persistent Volume Storage Class
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -74,7 +74,7 @@ persistence:
   ##
   # storageClass: "-"
   accessMode: ReadWriteOnce
-  size: 10Gi
+  size: 8Gi
 
 nodeSelector: {}
 
