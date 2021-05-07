@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: onlyoffice/documentserver
-  tag: 6.1.0.83
+  tag: 6.2.2.21
   pullPolicy: IfNotPresent
 
 strategy: RollingUpdate
