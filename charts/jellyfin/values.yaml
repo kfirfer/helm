@@ -44,6 +44,7 @@ service:
   ## Set the externalTrafficPolicy in the Service to either Cluster or Local
   # externalTrafficPolicy: Cluster
 
+env: {}
 
 ingress:
   enabled: false
