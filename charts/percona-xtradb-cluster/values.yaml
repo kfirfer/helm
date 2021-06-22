@@ -136,7 +136,6 @@ metrics:
     - "--collect.global_variables"
     - "--collect.auto_increment.columns"
     - "--collect.info_schema.innodb_metrics"
-    - "--collect.info_schema.innodb_tablespaces"
     - "--collect.info_schema.innodb_cmpmem"
     - "--collect.info_schema.innodb_cmp"
     - "--collect.info_schema.tablestats"
