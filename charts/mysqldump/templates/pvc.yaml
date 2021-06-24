@@ -6,6 +6,10 @@ metadata:
   name: {{ template "mysqldump.fullname" . }}
   labels:
 {{ include "mysqldump.labels" . | indent 4 }}
+{{- with .Values.persistence.annotations  }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
 spec:
   accessModes: [{{ .Values.persistence.accessMode | quote }}]
   {{- if .Values.persistence.storageClass }}

@@ -86,6 +86,7 @@ persistence:
   ##   GKE, AWS & OpenStack)
   ##
 #  storageClass: "local-storage"
+  annotations: {}
 
 # delete old backups
 housekeeping:
