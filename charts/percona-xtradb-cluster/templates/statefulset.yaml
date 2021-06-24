@@ -341,6 +341,10 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: mysql-data
+      {{- with .Values.persistence.annotations  }}
+      annotations:
+{{ toYaml . | indent 10 }}
+      {{- end }}
     spec:
       accessModes: [{{ .Values.persistence.accessMode | quote }}]
       {{- if .Values.persistence.storageClass }}
