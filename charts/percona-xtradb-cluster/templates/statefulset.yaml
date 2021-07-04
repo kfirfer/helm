@@ -189,7 +189,7 @@ spec:
       {{ end }}
       {{- if .Values.pmm.enabled }}
       - name: pmm-client
-        image: perconalab/pmm-client:2.12
+        image: "{{ .Values.pmm.image.repository }}:{{ .Values.pmm.image.tag }}"
         imagePullPolicy: {{ .Values.metrics.imagePullPolicy | quote }}
         securityContext:
           runAsUser: 1002
