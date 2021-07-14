@@ -136,7 +136,7 @@ spec:
         {{- end }}
       {{ if .Values.logTail.enabled }}
       - name: "logs"
-        image: "busybox:1.32.0"
+        image: "busybox:1.33.1"
         resources:
           {{- toYaml .Values.logTail.resources | nindent 12 }}
         imagePullPolicy: IfNotPresent
@@ -151,7 +151,7 @@ spec:
             echo "touch logs"
             touch /var/log/mysqld.log
             echo "finish touch logs"
-            tail -f /var/log/mysqld.log
+            tail -f /var/log/mysqld.log | grep -v mbind:
         volumeMounts:
         - name: var-log
           mountPath: /var/log
