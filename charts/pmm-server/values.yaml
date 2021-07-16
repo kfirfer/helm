@@ -60,6 +60,7 @@ service:
 
 ingress:
   enabled: false
+#  ingressClassName: nginx
   annotations: {}
   hosts:
     - host: www.example.com

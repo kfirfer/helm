@@ -24,6 +24,7 @@ ingress:
   enabled: false
   annotations: {}
   paths: ["/"]
+#  ingressClassName: nginx
   hosts:
     - "www.example.com"
   tls:

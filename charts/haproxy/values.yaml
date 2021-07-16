@@ -3,7 +3,7 @@ replicaCount: 3
 image:
   repository: haproxy
   pullPolicy: IfNotPresent
-  tag: 2.2.9
+  tag: 2.2.14
 
 imagePullSecrets: {}
 nameOverride: ""
@@ -14,6 +14,7 @@ podAnnotations: {}
 
 ingress:
   enabled: false
+  #  ingressClassName: nginx
   annotations: {}
   path: /
   hosts:
