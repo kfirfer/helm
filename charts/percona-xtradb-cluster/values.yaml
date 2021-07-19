@@ -77,6 +77,20 @@ persistence:
   size: 8Gi
   annotations: {}
 
+  logs:
+    enabled: false
+    ## percona logs Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 3Gi
+    annotations: {}
+
 nodeSelector: {}
 
 # Annotations to be added to pods
@@ -193,6 +207,22 @@ prometheus:
 logTail:
   enabled: true
   resources: {}
+#    requests:
+#      cpu: 10m
+#      memory: 25Mi
+#    limits:
+#      cpu: 1
+#      memory: 250Mi
+
+auditTail:
+  enabled: false
+  resources: {}
+#    requests:
+#      cpu: 10m
+#      memory: 25Mi
+#    limits:
+#      cpu: 1
+#      memory: 250Mi
 
 # Expose health check sidecar container for external components, such as HAproxy
 healthcheck:

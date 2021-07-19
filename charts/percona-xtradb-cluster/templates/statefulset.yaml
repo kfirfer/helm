@@ -128,7 +128,7 @@ spec:
           mountPath: /etc/mysql/conf.d
         - name: slash-root
           mountPath: /root
-        - name: var-log
+        - name: mysql-log
           mountPath: /var/log
         {{- if .Values.ssl.enabled }}
         - name: certificates
@@ -153,9 +153,31 @@ spec:
             echo "finish touch logs"
             tail -f /var/log/mysqld.log | grep -v mbind:
         volumeMounts:
-        - name: var-log
+        - name: mysql-log
           mountPath: /var/log
       {{ end }}
+        {{ if .Values.auditTail.enabled }}
+      - name: "audit"
+        image: "busybox:1.33.1"
+        resources:
+        {{- toYaml .Values.auditTail.resources | nindent 12 }}
+        imagePullPolicy: IfNotPresent
+        {{- with .Values.lifecycle }}
+        lifecycle:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+        command:
+          - /bin/sh
+          - "-c"
+          - |
+            echo "touch audit logs"
+            touch /var/log/audit.log
+            echo "finish touch logs"
+            tail -f /var/log/audit.log
+        volumeMounts:
+          - name: mysql-log
+            mountPath: /var/log
+        {{ end }}
       {{ if .Values.healthcheck.enabled }}
       - name: "healthcheck"
         image: "{{ .Values.healthcheck.image }}:{{ .Values.healthcheck.tag }}"
@@ -218,7 +240,7 @@ spec:
                 name: {{ template "percona-xtradb-cluster.fullname" . }}
                 key: mysql-root-password
         volumeMounts:
-          - name: var-log
+          - name: mysql-log
             mountPath: /var/log
           - name: mysql-startup-scripts
             mountPath: /tmp/startup-scripts
@@ -229,10 +251,10 @@ spec:
           - "-c"
           - |
             pmm-agent setup --force --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml
-            pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml &
+            pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --json &
             while true
             do
-            (pmm-admin add mysql --query-source=slowlog --username=$DB_USER --password=$DB_PASSWORD && sleep infinity) || (echo "sleeping for 10 seconds" && sleep 10)
+            (pmm-admin add mysql --query-source=slowlog --username=$DB_USER --password=$DB_PASSWORD --json && sleep infinity) || (echo "sleeping for 10 seconds" && sleep 10)
             done
       {{- end }}
       {{- if .Values.metrics.enabled }}
@@ -288,8 +310,10 @@ spec:
         emptyDir: {}
       - name: slash-root
         emptyDir: {}
-      - name: var-log
+        {{- if not .Values.persistence.logs.enabled }}
+      - name: mysql-log
         emptyDir: {}
+        {{ end }}
       - name: mysql-config-files
         configMap:
           name: {{ template "percona-xtradb-cluster.fullname" . }}-config-files
@@ -357,4 +381,24 @@ spec:
       resources:
         requests:
           storage: {{ .Values.persistence.size | quote }}
+    {{- if .Values.persistence.logs.enabled }}
+  - metadata:
+      name: mysql-log
+      {{- with .Values.persistence.logs.annotations  }}
+      annotations:
+{{ toYaml . | indent 10 }}
+    {{- end }}
+    spec:
+      accessModes: [{{ .Values.persistence.logs.accessMode | quote }}]
+      {{- if .Values.persistence.logs.storageClass }}
+      {{- if (eq "-" .Values.persistence.logs.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.persistence.logs.storageClass }}"
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.logs.size | quote }}
   {{- end -}}
+{{ end }}
