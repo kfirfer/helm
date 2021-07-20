@@ -20,6 +20,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "onlyoffice.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        app: "onlyoffice"
+        version: "{{ .Values.image.tag }}"
       {{- if .Values.podAnnotations }}
       annotations:
 {{ toYaml .Values.podAnnotations | indent 8 }}

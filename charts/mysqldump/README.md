@@ -118,3 +118,17 @@ Alternatively, a YAML file that specifies the values for the parameters can be p
 ```console
 helm install stable/mysqldump --name my-release -f values.yaml
 ```
+
+### Restore from backup
+
+Restore a backup example command:
+
+```console
+kubectl exec -it <mysqldump dataaccess pod> -- bash
+```
+
+Inside the pod:
+```console:
+zcat /backup/20200824000008_$SCHEMA.sql.gz | mysql -h haproxy -u 'root' -p$ROOT_PASSWORD $SCHEMA &
+```
+

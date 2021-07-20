@@ -17,6 +17,8 @@ spec:
     metadata:
       labels:
         {{- include "haproxy.selectorLabels" . | nindent 8 }}
+        app: "haproxy"
+        version: "{{ .Values.image.tag }}"
       annotations:
       {{- if .Values.podAnnotations }}
 {{ toYaml .Values.podAnnotations | indent 8 }}

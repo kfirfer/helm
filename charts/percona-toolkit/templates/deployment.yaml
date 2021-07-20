@@ -17,6 +17,8 @@ spec:
     {{- end }}
       labels:
         {{- include "percona-toolkit.selectorLabels" . | nindent 8 }}
+        app: {{ include "percona-toolkit.name" . }}
+        version: "{{ .Values.image.tag }}"
     spec:
       automountServiceAccountToken: {{ .Values.serviceAccount.automountToken }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}

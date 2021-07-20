@@ -48,6 +48,7 @@ Selector labels
 */}}
 {{- define "pmm-server.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "pmm-server.name" . }}
+app: {{ include "pmm-server.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 

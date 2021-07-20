@@ -18,6 +18,7 @@ spec:
     metadata:
       labels:
         app: {{ template "mysqldump.fullname" . }}-dataaccess
+        version: "{{ .Values.image.tag }}"
       {{- if .Values.podAnnotations }}
       annotations:
 {{ toYaml .Values.podAnnotations | indent 8 }}
