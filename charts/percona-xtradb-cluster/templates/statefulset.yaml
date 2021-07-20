@@ -22,6 +22,7 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
+        version: "{{.Values.image.tag }}"
     {{- if .Values.podAnnotations }}
       annotations:
 {{ toYaml .Values.podAnnotations | indent 8 }}
@@ -280,13 +281,13 @@ spec:
           - {{ $f | quote }}
           {{- end }}
         ports:
-          - name: metrics
+          - name: http-metrics
             containerPort: 9104
         {{ if .Values.metrics.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
             path: /
-            port: metrics
+            port: http-metrics
           initialDelaySeconds: {{ .Values.metrics.livenessProbe.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.metrics.livenessProbe.timeoutSeconds }}
         {{ end }}
@@ -294,7 +295,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /
-            port: metrics
+            port: http-metrics
           initialDelaySeconds: {{ .Values.metrics.readinessProbe.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.metrics.readinessProbe.timeoutSeconds }}
         {{ end }}

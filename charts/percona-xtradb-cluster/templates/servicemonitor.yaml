@@ -20,7 +20,7 @@ spec:
       app: {{ template "percona-xtradb-cluster.fullname" . }}
       release: {{ .Release.Name }}
   endpoints:
-  - port: metrics
+  - port: http-metrics
     interval: {{ .Values.prometheus.operator.serviceMonitor.interval }}
   namespaceSelector:
     any: true

@@ -16,9 +16,9 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: metrics
+  - name: http-metrics
     port: 9104
-    targetPort: metrics
+    targetPort: http-metrics
   selector:
     app: {{ template "percona-xtradb-cluster.fullname" . }}
     release: "{{ .Release.Name }}"
