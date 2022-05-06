@@ -13,6 +13,10 @@ spec:
     metadata:
       labels:
         app: permission-manager
+      annotations:
+        {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
     spec:
       securityContext:
 {{ toYaml .Values.podSecurityContext | indent 8 }}
@@ -21,7 +25,7 @@ spec:
         - name: permission-manager
           securityContext:
 {{ toYaml .Values.securityContext | indent 12 }}
-          image: quay.io/sighup/permission-manager:v1.6.0
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           ports:
             - containerPort: {{ .Values.service.port }}
           envFrom:

@@ -1,5 +1,9 @@
 replicas: 1
 
+image:
+  repository: quay.io/sighup/permission-manager
+  tag: v1.7.1-rc1
+
 # port where server is exposed
 service:
   port: 4000
@@ -24,6 +28,7 @@ securityContext:
 ingress:
   enabled: false
   annotations: {}
+#  ingressClassName: nginx
   path: /
   hosts:
     - www.example.com
@@ -34,5 +39,8 @@ ingress:
 resources: {}
 
 affinity: {}
+
+podAnnotations: {}
+
 
 
