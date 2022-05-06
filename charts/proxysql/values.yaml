@@ -107,5 +107,8 @@ antiAffinityTopologyKey: "kubernetes.io/hostname"
 # Resource requests and limits
 resources: {}
 
+# Assigning Pods to Nodes
+nodeSelector: {}
+
 # Optional tolerations
 tolerations: {}
