@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "6.2.2.21"
+appVersion: "7.0.1.37"
 description: A Helm chart for onlyoffice
 name: onlyoffice
-version: 1.2.2
+version: 1.2.3
 icon: https://avatars0.githubusercontent.com/u/22418908?s=200&v=4
 sources:
 - https://hub.docker.com/r/onlyoffice/documentserver
