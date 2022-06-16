@@ -103,3 +103,4 @@ lifecycle: {}
 #    exec:
 #      command: ["/bin/sh", "-c", "sleep 3"]
 
+extraManifests: []
