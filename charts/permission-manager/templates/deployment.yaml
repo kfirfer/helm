@@ -29,8 +29,13 @@ spec:
           ports:
             - containerPort: {{ .Values.service.port }}
           envFrom:
+            {{ if .Values.existingSecret }}
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+            {{ else }}
             - secretRef:
                 name: permission-manager
+            {{ end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       {{- with .Values.affinity }}

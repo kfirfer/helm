@@ -17,6 +17,7 @@ controlPlaneAddress: "https://kubernetes.example.com:8443"
 # password used by basic auth (username is `admin`)
 basicAuthPassword: "someverysecuredpassword"
 
+existingSecret: ""
 
 podSecurityContext:
   fsGroup: 0
