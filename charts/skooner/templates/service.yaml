@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: skooner
+  labels:
+    app: skooner
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  ports:
+  - name: http-skooner
+    port: 4654
+    protocol: TCP
+    targetPort: 4654
+  selector:
+    app: skooner
+    release: {{ .Release.Name }}
