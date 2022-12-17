@@ -35,6 +35,7 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "skooner.labels" -}}
+app: {{ include "skooner.chart" . }}
 helm.sh/chart: {{ include "skooner.chart" . }}
 {{ include "skooner.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
@@ -72,3 +73,23 @@ Provide a pre-defined claim or a claim based on the Release
 {{- template "skooner.fullname" . }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Return the target Kubernetes version
+*/}}
+{{- define "skooner.kubeVersion" -}}
+  {{- default .Capabilities.KubeVersion.Version .Values.kubeVersionOverride }}
+{{- end -}}
+
+{{/*
+Return the appropriate apiVersion for pod disruption budget
+*/}}
+{{- define "skooner.podDisruptionBudget.apiVersion" -}}
+{{- if semverCompare "<1.21-0" (include "skooner.kubeVersion" $) -}}
+{{- print "policy/v1beta1" -}}
+{{- else -}}
+{{- print "policy/v1" -}}
+{{- end -}}
+{{- end -}}
+
+
