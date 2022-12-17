@@ -21,10 +21,12 @@ spec:
       release: {{ .Release.Name }}
   template:
     metadata:
+      {{- if .Values.podAnnotations }}
       annotations:
         {{- range $key, $value := .Values.podAnnotations }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
+      {{- end }}
       labels:
         app: skooner
         release: {{ .Release.Name }}
