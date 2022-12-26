@@ -23,7 +23,7 @@ spec:
     {{- end }}
       labels:
         {{- include "redis-commander.selectorLabels" . | nindent 8 }}
-        version: "{{ .Values.image.tag }}"
+        version: {{ .Values.image.tag | quote }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
