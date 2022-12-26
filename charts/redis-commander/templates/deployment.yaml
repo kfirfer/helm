@@ -52,6 +52,10 @@ spec:
           - name: REDIS_HOST
             value: {{ . }}
           {{- end }}
+          {{- with .Values.redis.port }}
+          - name: REDIS_PORT
+            value: {{ . }}
+          {{- end }}
           {{- with .Values.redis.password }}
           - name: REDIS_PASSWORD
             value: {{ . | quote }}
@@ -66,6 +70,10 @@ spec:
           {{- end }}
           {{- with .Values.httpAuth.password }}
           - name: HTTP_PASSWORD
+            value: {{ . }}
+          {{- end }}
+          {{- with .Values.redis.tls }}
+          - name: REDIS_TLS
             value: {{ . }}
           {{- end }}
           - name: K8S_SIGTERM

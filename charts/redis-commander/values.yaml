@@ -16,11 +16,15 @@ redis:
   # Specifies a single Redis host
   #host: "redis-master"
 
+  #port: 6379
+
   # Specifies redis password
   #password: "Something"
 
   # Specifies multiple redis endpoints <label:host:port>,...
   #hosts: "local:localhost:6379,myredis:10.10.20.30"
+
+  #tls: true
 
 httpAuth:
   # Specify http basic username and password to protect access to redis commander web ui
