@@ -26,6 +26,8 @@ redis:
 
   #tls: true
 
+annotations: {}
+
 httpAuth:
   # Specify http basic username and password to protect access to redis commander web ui
   username: ""
