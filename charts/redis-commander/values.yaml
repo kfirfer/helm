@@ -4,10 +4,10 @@
 
 replicaCount: 1
 image:
-  repository: rediscommander/redis-commander
+  repository: visol/redis-commander
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "0.8.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -16,11 +16,17 @@ redis:
   # Specifies a single Redis host
   #host: "redis-master"
 
+  #port: 6379
+
   # Specifies redis password
   #password: "Something"
 
   # Specifies multiple redis endpoints <label:host:port>,...
   #hosts: "local:localhost:6379,myredis:10.10.20.30"
+
+  #tls: true
+
+annotations: {}
 
 httpAuth:
   # Specify http basic username and password to protect access to redis commander web ui
@@ -92,6 +98,22 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+# Init containers to add to deployment's pod spec. At least one plugin provider image is required.
+# If the value is a string then it is evaluated as a template.
+initContainers: []
+# - name: plugin-for-csi
+#   image: velero/velero-plugin-for-csi:v0.3.0
+#   imagePullPolicy: IfNotPresent
+#   volumeMounts:
+#     - mountPath: /target
+#       name: plugins
+# - name: plugin-for-aws
+#   image: velero/velero-plugin-for-aws:v1.5.0
+#   imagePullPolicy: IfNotPresent
+#   volumeMounts:
+#     - mountPath: /target
+#       name: plugins
+
 nodeSelector: {}
 
 tolerations: []
@@ -103,3 +125,4 @@ lifecycle: {}
 #    exec:
 #      command: ["/bin/sh", "-c", "sleep 3"]
 
+extraManifests: []

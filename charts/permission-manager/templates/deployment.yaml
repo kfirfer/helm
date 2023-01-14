@@ -31,6 +31,10 @@ spec:
           envFrom:
             - secretRef:
                 name: permission-manager
+            {{ if .Values.existingSecret }}
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+            {{ end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       {{- with .Values.affinity }}

@@ -1,0 +1,11 @@
+apiVersion: v1
+appVersion: 0.0.1
+description: A Helm chart for Kubernetes skooner
+icon: https://3.bp.blogspot.com/-9_-b0nEDB94/XDeXlBAancI/AAAAAAAAEo0/T7V1-SK_MWcXgNDxbrk1uJTaPTDZPATyACLcBGAs/s1600/helm.png
+maintainers:
+- email: kiryanov.i@gmail.com
+  name: Ivan Kirianov
+- email: eric@herbrandson.com
+  name: Eric Herbrandson
+name: skooner
+version: 0.0.5

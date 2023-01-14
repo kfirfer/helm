@@ -4,6 +4,10 @@ metadata:
   name: {{ include "redis-commander.fullname" . }}
   labels:
     {{- include "redis-commander.labels" . | nindent 4 }}
+{{- if .Values.annotations }}
+  annotations:
+{{ toYaml .Values.annotations | indent 4 }}
+{{- end }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -19,7 +23,6 @@ spec:
     {{- end }}
       labels:
         {{- include "redis-commander.selectorLabels" . | nindent 8 }}
-        version: "{{ .Values.image.tag }}"
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -33,7 +36,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.lifecycle }}
           lifecycle:
@@ -52,6 +55,10 @@ spec:
           - name: REDIS_HOST
             value: {{ . }}
           {{- end }}
+          {{- with .Values.redis.port }}
+          - name: REDIS_PORT
+            value: {{ . | quote }}
+          {{- end }}
           {{- with .Values.redis.password }}
           - name: REDIS_PASSWORD
             value: {{ . | quote }}
@@ -68,6 +75,10 @@ spec:
           - name: HTTP_PASSWORD
             value: {{ . }}
           {{- end }}
+          {{- with .Values.redis.tls }}
+          - name: REDIS_TLS
+            value: {{ . | quote }}
+          {{- end }}
           - name: K8S_SIGTERM
             value: "1"
           livenessProbe:
@@ -78,6 +89,14 @@ spec:
             timeoutSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+{{- if .Values.initContainers }}
+      initContainers:
+        {{- if eq (typeOf .Values.initContainers) "string" }}
+        {{- tpl .Values.initContainers . | nindent 8 }}
+        {{- else }}
+        {{- toYaml .Values.initContainers | nindent 8 }}
+        {{- end }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
