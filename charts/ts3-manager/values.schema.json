@@ -1,0 +1,174 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "replicaCount": {
+      "type": "integer",
+      "form": true,
+      "title": "Number of Replicas",
+      "min": 1,
+      "max": 3
+    },
+    "env": {
+      "type": "object",
+      "title": "Environment Variables",
+      "form": true,
+      "properties": {
+        "MYSQL_HOST": {
+          "type": "string",
+          "title": "MySQL Host",
+          "form": true
+        },
+        "MYSQL_USER": {
+          "type": "string",
+          "title": "MySQL User",
+          "form": true
+        },
+        "REDIS_HOST": {
+          "type": "string",
+          "title": "Redis Host",
+          "form": true
+        }
+      }
+    },
+    "secret": {
+      "type": "object",
+      "title": "Secret Environment Variables",
+      "form": true,
+      "properties": {
+        "MYSQL_PASSWORD": {
+          "type": "string",
+          "title": "MySQL User Password",
+          "form": true
+        },
+        "REDIS_PASSWORD": {
+          "type": "string",
+          "title": "Redis Password",
+          "form": true
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "title": "Required Resources",
+      "form": true,
+      "properties": {
+        "requests": {
+          "type": "object",
+          "properties": {
+            "memory": {
+              "type": "string",
+              "form": true,
+              "render": "slider",
+              "title": "Memory Request",
+              "sliderMin": 10,
+              "sliderMax": 2048,
+              "sliderUnit": "Mi"
+            },
+            "cpu": {
+              "type": "string",
+              "form": true,
+              "render": "slider",
+              "title": "CPU Request",
+              "sliderMin": 10,
+              "sliderMax": 2000,
+              "sliderUnit": "m"
+            }
+          }
+        }
+      }
+    },
+    "livenessProbe": {
+      "type": "object",
+      "form": true,
+      "title": "Liveness",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "form": true,
+          "title": "Enable"
+        }
+      }
+    },
+    "readinessProbe": {
+      "type": "object",
+      "form": true,
+      "title": "Readiness",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "form": true,
+          "title": "Enable"
+        }
+      }
+    },
+    "opentracing": {
+      "type": "object",
+      "form": true,
+      "title": "Jaeger - Open Tracing",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "form": true,
+          "title": "Enable"
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "form": true,
+      "title": "Metrics",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "form": true,
+          "title": "Enable"
+        }
+      }
+    },
+    "imagePullSecret": {
+      "type": "object",
+      "form": true,
+      "title": "Image pull secret details",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "form": true,
+          "title": "Use image pull secret",
+          "description": "If the docker image hosted on private repository"
+        },
+        "secret": {
+          "type": "string",
+          "form": true,
+          "title": "Secret content",
+          "hidden": {
+            "value": false,
+            "path": "imagePullSecret/enabled"
+          }
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "form": true,
+      "title": "Ingress details",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "form": true,
+          "title": "Use a custom hostname",
+          "description": "Enable the ingress resource that allows you to access the application installation."
+        },
+        "hostname": {
+          "type": "string",
+          "form": true,
+          "title": "Hostname",
+          "hidden": {
+            "value": false,
+            "path": "ingress/enabled"
+          }
+        }
+      }
+    }
+  }
+}
