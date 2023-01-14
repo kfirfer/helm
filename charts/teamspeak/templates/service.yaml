@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "teamspeak.fullname" . }}-query
+  labels:
+    {{- include "teamspeak.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.query.type }}
+  {{ if .Values.service.query.externalTrafficPolicy }}
+  externalTrafficPolicy: "{{ .Values.service.query.externalTrafficPolicy }}"
+  {{ end }}
+  {{- with .Values.service.query.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with .Values.service.query.externalIPs }}
+  externalIPs:
+{{ . | toYaml | nindent 4 }}
+  {{- end }}
+  ports:
+  {{- if (contains "raw" .Values.config.TS3SERVER_QUERY_PROTOCOLS) }}
+    - port: {{ .Values.service.query.rawPort }}
+      targetPort: queryraw
+      protocol: TCP
+      name: queryraw
+  {{- end }}
+  {{- if (contains "ssh" .Values.config.TS3SERVER_QUERY_PROTOCOLS) }}
+    - port: {{ .Values.service.query.sshPort }}
+      targetPort: queryssh
+      protocol: TCP
+      name: queryssh
+  {{- end }}
+  selector:
+    {{- include "teamspeak.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "teamspeak.fullname" . }}-file
+  labels:
+    {{- include "teamspeak.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.file.type }}
+  {{ if .Values.service.file.externalTrafficPolicy }}
+  externalTrafficPolicy: "{{ .Values.service.file.externalTrafficPolicy }}"
+  {{ end }}
+  externalTrafficPolicy: "{{ .Values.service.file.externalTrafficPolicy }}"
+  {{- with .Values.service.file.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with .Values.service.file.externalIPs }}
+  externalIPs:
+{{ . | toYaml | nindent 4 }}
+  {{- end }}
+  ports:
+    - port: {{ .Values.service.file.port }}
+      targetPort: file
+      protocol: TCP
+      name: file
+  selector:
+    {{- include "teamspeak.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "teamspeak.fullname" . }}-voice
+  labels:
+    {{- include "teamspeak.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.voice.type }}
+  {{ if .Values.service.voice.externalTrafficPolicy }}
+  externalTrafficPolicy: "{{ .Values.service.voice.externalTrafficPolicy }}"
+  {{ end }}
+  {{- with .Values.service.voice.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with .Values.service.voice.externalIPs }}
+  externalIPs:
+{{ . | toYaml | nindent 4 }}
+  {{- end }}
+  ports:
+  {{- range $key, $val := .Values.service.voice.ports }}
+    - port: {{ $val }}
+      targetPort: voice{{ $key }}
+      protocol: UDP
+      name: voice{{ $key }}
+  {{- end }}
+  selector:
+    {{- include "teamspeak.selectorLabels" . | nindent 4 }}
