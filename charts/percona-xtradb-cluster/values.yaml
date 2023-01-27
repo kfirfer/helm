@@ -123,7 +123,7 @@ pmm:
   enabled: false
   image:
     repository: perconalab/pmm-client
-    tag: 2.27.0
+    tag: 2.33.0
   user: admin
   password: admin
   server:
@@ -133,7 +133,7 @@ pmm:
 metrics:
   enabled: false
   image: prom/mysqld-exporter
-  imageTag: v0.13.0
+  imageTag: v0.14.0
   imagePullPolicy: IfNotPresent
   resources: {}
   annotations:
