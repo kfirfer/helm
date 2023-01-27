@@ -4,6 +4,10 @@ metadata:
   name: {{ include "haproxy.fullname" . }}
   labels:
 {{- include "haproxy.labels" . | nindent 4 }}
+{{- if .Values.annotations }}
+  annotations:
+{{ toYaml .Values.annotations | indent 4 }}
+{{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:

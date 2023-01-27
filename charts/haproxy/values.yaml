@@ -12,6 +12,9 @@ fullnameOverride: ""
 # Annotations to be added to pods
 podAnnotations: {}
 
+# Annotations to be added to deployment
+annotations: {}
+
 ingress:
   enabled: false
   #  ingressClassName: nginx

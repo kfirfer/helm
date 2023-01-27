@@ -70,6 +70,6 @@ data:
     frontend metrics
       mode http
       bind *:{{ .Values.metrics.port }}
-      option http-use-htx
+      #option http-use-htx
       http-request use-service prometheus-exporter if { path {{ .Values.metrics.scrapePath }} }
     {{- end }}
