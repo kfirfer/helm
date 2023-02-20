@@ -126,3 +126,11 @@ lifecycle: {}
 #      command: ["/bin/sh", "-c", "sleep 3"]
 
 extraManifests: []
+
+tests:
+  image:
+    registry: docker.io
+    repository: busybox
+    pullPolicy: IfNotPresent
+    tag: "1-musl"
+
