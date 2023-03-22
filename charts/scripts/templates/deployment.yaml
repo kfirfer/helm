@@ -44,7 +44,11 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           command:
-{{ toYaml .Values.command | indent 16 }}
+{{- if eq (typeOf .Values.command) "string" }}
+{{- tpl .Values.command . | nindent 16 }}
+{{- else }}
+{{- toYaml .Values.command | nindent 16 }}
+{{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
