@@ -8,6 +8,8 @@ spec:
   - name: mysql-backup
     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
     imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+    securityContext:
+      allowPrivilegeEscalation: false
     command: ["/bin/bash", "/scripts/backup.sh"]
 {{- if or .Values.mysql.existingSecret .Values.upload.openstack.existingSecret }}
     env:
