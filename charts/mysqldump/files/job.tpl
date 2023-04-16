@@ -10,7 +10,12 @@ spec:
     imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
     securityContext:
       allowPrivilegeEscalation: false
+   {{- if .Values.command }}
+    command:
+{{ toYaml .Values.command | indent 6 }}
+    {{- else }}
     command: ["/bin/bash", "/scripts/backup.sh"]
+    {{- end }}
 {{- if or .Values.mysql.existingSecret .Values.upload.openstack.existingSecret }}
     env:
 {{- end }}
