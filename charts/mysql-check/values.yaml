@@ -33,6 +33,7 @@ secret:
   MYSQL_HOST: "mysql-primary"
   MYSQL_USER: "root"
   MYSQL_PASSWORD: "password_here"
+  SLEEP_BEFORE_RUN_SECONDS: "5"
 
 rbac:
   # Specifies whether RBAC should be enabled
