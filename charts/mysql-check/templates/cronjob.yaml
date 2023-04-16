@@ -81,14 +81,9 @@ spec:
               command:
 {{ toYaml .Values.command | indent 16 }}
 {{- end }}
-              args:
-                - "--all-databases"
-                - "--skip-database=mysql"
-                - "--auto-repair"
-                - "--optimize"
-                - "--host={{.Values.mysqlcheck.host}}"
-                - "--user={{.Values.mysqlcheck.user}}"
-                - "--password={{.Values.mysqlcheck.password}}"
+              envFrom:
+                - secretRef:
+                    name: {{ template "mysql-check.fullname" . }}-secret-env
               env:
 {{- if .Values.envFromSecrets }}
 {{- range $key,$value := .Values.envFromSecrets }}

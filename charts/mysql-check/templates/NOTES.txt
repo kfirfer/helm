@@ -1,1 +1,0 @@
-mysqlcheck --all-databases --skip-database=mysql --auto-repair --optimize --host={{.Values.mysqlcheck.host}} --user={{.Values.mysqlcheck.user}} --password={{.Values.mysqlcheck.password}}
