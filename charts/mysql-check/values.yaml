@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: imega/mysql-client
+  repository: kfirfer/mysql-client
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "10.5.8"
+  tag: "0.0.1"
 
 cronjob:
   # At 04:00 every day
@@ -19,11 +19,6 @@ cronjob:
   failedJobsHistoryLimit: "3"
   successfulJobsHistoryLimit: "1"
   jobRestartPolicy: Never
-
-mysqlcheck:
-  host: mysqlhost
-  user: root
-  password: rootpassword
 
 imagePullSecrets: []
 nameOverride: ""
@@ -43,7 +38,7 @@ command:
   - sh
   - -c
   - >-
-    sleep ${SLEEP_BEFORE_RUN_SECONDS} && mysqlcheck --all-databases --skip-database=mysql --auto-repair --optimize --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASSWORD}
+    sleep ${SLEEP_BEFORE_RUN_SECONDS} && mysqlcheck --all-databases --skip-database=mysql --auto-repair --optimize --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASSWORD}  && echo "Finished"
 
 serviceAccount:
   # Specifies whether a service account should be created
