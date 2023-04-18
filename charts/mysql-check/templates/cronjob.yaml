@@ -31,6 +31,7 @@ spec:
         app: {{ template "mysql-check.name" . }}
         release: {{ .Release.Name }}
     spec:
+      backoffLimit: 1
       template:
         metadata:
           labels:
