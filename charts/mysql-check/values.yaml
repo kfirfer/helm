@@ -19,6 +19,7 @@ cronjob:
   failedJobsHistoryLimit: "3"
   successfulJobsHistoryLimit: "1"
   jobRestartPolicy: Never
+  backoffLimit: 1
 
 imagePullSecrets: []
 nameOverride: ""
