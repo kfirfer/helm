@@ -1,0 +1,38 @@
+{{- if and ( .Values.metrics.serviceMonitor.enabled ) ( .Values.metrics.enabled ) }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+{{- if .Values.metrics.serviceMonitor.labels }}
+  labels:
+{{ toYaml .Values.metrics.serviceMonitor.labels | indent 4}}
+{{- end }}
+  name: {{ template "slackgpt.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+{{- if .Values.metrics.serviceMonitor.namespace }}
+  namespace: {{ .Values.metrics.serviceMonitor.namespace }}
+{{- end }}
+spec:
+  endpoints:
+  - targetPort: {{ .Values.metrics.port }}
+{{- if .Values.metrics.serviceMonitor.interval }}
+    interval: {{ .Values.metrics.serviceMonitor.interval }}
+{{- end }}
+{{- if .Values.metrics.serviceMonitor.path }}
+    path: {{ .Values.metrics.serviceMonitor.path }}
+{{- end }}
+{{- if .Values.metrics.serviceMonitor.timeout }}
+    scrapeTimeout: {{ .Values.metrics.serviceMonitor.timeout }}
+{{- end }}
+    metricRelabelings:
+    - action: replace
+      sourceLabels:
+        - container
+      targetLabel: application
+  jobLabel: {{ template "slackgpt.fullname" . }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "slackgpt.name" . }}
+{{- end }}

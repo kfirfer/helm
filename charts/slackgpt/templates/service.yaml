@@ -1,0 +1,62 @@
+{{- if or .Values.metrics.enabled .Values.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "slackgpt.fullname" . }}
+  labels:
+    {{- include "slackgpt.labels" . | nindent 4 }}
+  {{- if or .Values.metrics.enabled .Values.service.annotations }}
+  annotations:
+  {{- if .Values.metrics.enabled }}
+  {{- range $key, $value := .Values.metrics.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.service.annotations }}
+  {{- range $key, $value := .Values.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    {{- if .Values.service.enabled }}
+    - port: {{ .Values.service.port }}
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+      targetPort: {{ .Values.containerPort }}
+      protocol: {{ .Values.service.protocol }}
+      name: {{ .Values.service.name }}
+      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
+      appProtocol: http
+      {{- end }}
+      {{- end }}
+    {{- if .Values.metrics.enabled }}
+    - port: {{ .Values.metrics.port }}
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort | add 1 }}
+      {{- end }}
+      targetPort: {{ .Values.metrics.port }}
+      protocol: TCP
+      name: metrics
+      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
+      appProtocol: metrics
+      {{- end }}
+    {{- end }}
+    {{- if .Values.debug.enabled }}
+    - port: {{ .Values.debug.port }}
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort | add 2 }}
+      {{- end }}
+      targetPort: {{ .Values.debug.port }}
+      protocol: TCP
+      name: debug
+      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
+      appProtocol: debug
+      {{- end }}
+    {{- end }}
+  selector:
+    {{- include "slackgpt.selectorLabels" . | nindent 4 }}
+{{- end }}
