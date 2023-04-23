@@ -1,0 +1,26 @@
+{{- if .Values.service }}
+{{- range $port := .Values.service.ports  }}
+{{- $service_type := $port.type | default "ClusterIP" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fluentd-elasticsearch.fullname" $ | trunc 50 }}-{{ $port.name | trunc 12 }}
+  labels:
+    {{- include "fluentd-elasticsearch.labels" $ | nindent 4 }}
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  type: {{ $service_type }}
+  ports:
+    - name: {{ $port.name }}
+      port: {{ $port.port }}
+      targetPort: {{ $port.port }}
+      {{- if and ($port.nodePort) (eq $service_type "NodePort") }}
+      nodePort: {{ $port.nodePort }}
+      {{- end }}
+      {{- if $port.protocol }}
+      protocol: {{ $port.protocol }}
+      {{- end }}
+  selector:
+    {{- include "fluentd-elasticsearch.selectorLabels" $ | nindent 4 }}
+{{- end }}
+{{- end }}
