@@ -4,7 +4,7 @@
 ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
 image:
   repository: "percona/percona-xtradb-cluster"
-  tag: "8.0.30-22.1"
+  tag: "8.0.32-24.1"
   pullPolicy: IfNotPresent
 
 # Desired number of members of xtradb cluster
@@ -123,7 +123,7 @@ pmm:
   enabled: false
   image:
     repository: perconalab/pmm-client
-    tag: 2.33.0
+    tag: 2.36.0
   user: admin
   password: admin
   server:
