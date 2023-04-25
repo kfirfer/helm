@@ -37,6 +37,10 @@ spec:
       securityContext:
         {{ . | toYaml | nindent 8 }}
       {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
       containers:
       - name: database
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

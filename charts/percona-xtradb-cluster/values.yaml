@@ -10,6 +10,8 @@ image:
 # Desired number of members of xtradb cluster
 replicas: 3
 
+imagePullSecrets: []
+
 ## Specify password for root user
 ##
 mysqlRootPassword: ""

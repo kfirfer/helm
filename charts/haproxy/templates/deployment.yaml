@@ -34,10 +34,10 @@ spec:
         - name: esconfig
           configMap:
             name: {{ template "haproxy.fullname" . }}-config
-    {{- with .Values.imagePullSecrets }}
+      {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "haproxy.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountToken }}
       securityContext:
