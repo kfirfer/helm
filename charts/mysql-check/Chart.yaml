@@ -3,7 +3,7 @@ name: mysql-check
 description: A Helm chart for Kubernetes
 icon: https://www.mysql.com/common/logos/logo-mysql-170x115.png
 type: application
-version: 0.2.4
+version: 0.2.5
 appVersion: 0.0.1
 home: https://github.com/kfirfer/helm/tree/master/charts/mysql-check
 maintainers:
