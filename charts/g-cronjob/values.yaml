@@ -27,6 +27,8 @@ fullnameOverride: ""
 
 secret: {}
 
+env: {}
+
 rbac:
   # Specifies whether RBAC should be enabled
   enabled: true

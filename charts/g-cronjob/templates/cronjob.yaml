@@ -85,17 +85,8 @@ spec:
               envFrom:
                 - secretRef:
                     name: {{ template "g-cronjob.fullname" . }}-secret-env
-              env:
-{{- if .Values.envFromSecrets }}
-{{- range $key,$value := .Values.envFromSecrets }}
-              - name: {{ $key | upper | quote}}
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ $value.from.secret | quote}}
-                    key: {{ $value.from.key | quote}}
-{{- end }}
-{{- end }}
 {{- if .Values.env }}
+              env:
 {{- range $key,$value := .Values.env }}
               - name: {{ $key | upper | quote}}
                 value: {{ $value | quote}}
