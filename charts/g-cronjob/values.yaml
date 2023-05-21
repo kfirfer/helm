@@ -32,6 +32,7 @@ env: {}
 rbac:
   # Specifies whether RBAC should be enabled
   enabled: true
+  createClusterScoped: false
 
 command:
   - /bin/sh
