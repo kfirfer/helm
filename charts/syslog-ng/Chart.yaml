@@ -5,10 +5,6 @@ annotations:
   truecharts.org/grade: U
 apiVersion: v2
 appVersion: 4.0.1
-dependencies:
-- name: common
-  repository: https://library-charts.truecharts.org
-  version: 11.1.2
 description: syslog-ng allows you to flexibly collect, parse, classify, rewrite and
   correlate logs.
 home: https://truecharts.org/charts/stable/syslog-ng
@@ -25,4 +21,4 @@ sources:
 - https://github.com/truecharts/charts/tree/master/charts/stable/syslog-ng
 - https://hub.docker.com/r/balabit/syslog-ng
 type: application
-version: 4.0.10
+version: 4.0.11
