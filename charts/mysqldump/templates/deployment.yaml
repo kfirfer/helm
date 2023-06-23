@@ -29,6 +29,7 @@ spec:
       {{- range .Values.image.imagePullSecrets }}
         - name: {{ . }}
       {{- end }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
