@@ -1,8 +1,8 @@
 spec:
   {{- if .Values.image.imagePullSecrets }}
-   imagePullSecrets:
+  imagePullSecrets:
   {{- range .Values.image.imagePullSecrets }}
-     - name: {{ . }}
+    - name: {{ . }}
   {{- end }}
   {{- end }}
   {{- if .Values.securityContext.enabled }}
