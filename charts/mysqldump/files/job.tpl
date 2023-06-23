@@ -1,4 +1,9 @@
 spec:
+  {{- if .Values.image.imagePullSecrets }}
+   imagePullSecrets:
+  {{- range .Values.image.imagePullSecrets }}
+     - name: {{ . }}
+  {{- end }}
   {{- if .Values.securityContext.enabled }}
   securityContext:
     fsGroup: {{ .Values.securityContext.fsGroup }}
