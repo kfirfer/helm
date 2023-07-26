@@ -1,0 +1,11 @@
+{{- if .Values.imagePullSecret.enabled }}
+apiVersion: v1
+data:
+  .dockercfg: {{ .Values.imagePullSecret.secret }}
+kind: Secret
+metadata:
+  name: {{ include "ts3-manager.fullname" . }}-private-registry
+  labels:
+    {{- include "ts3-manager.labels" . | nindent 4 }}
+type: kubernetes.io/dockercfg
+{{ end }}

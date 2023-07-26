@@ -1,0 +1,25 @@
+{{ if .Values.metrics.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ template "percona-xtradb-cluster.fullname" . }}-metrics"
+  labels:
+    app: {{ template "percona-xtradb-cluster.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  annotations:
+{{- if and (.Values.metrics.enabled) (.Values.metrics.annotations) }}
+{{ toYaml .Values.metrics.annotations | indent 4 }}
+{{- end }}
+spec:
+  clusterIP: None
+  ports:
+  - name: http-metrics
+    port: 9104
+    targetPort: http-metrics
+  selector:
+    app: {{ template "percona-xtradb-cluster.fullname" . }}
+    release: "{{ .Release.Name }}"
+{{ end }}

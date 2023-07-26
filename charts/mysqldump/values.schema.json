@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "resources": {
+      "type": "object",
+      "title": "Required Resources",
+      "form": true,
+      "properties": {
+        "requests": {
+          "type": "object",
+          "properties": {
+            "memory": {
+              "type": "string",
+              "form": true,
+              "render": "slider",
+              "title": "Memory Request",
+              "sliderMin": 50,
+              "sliderMax": 1000,
+              "sliderUnit": "Mi"
+            },
+            "cpu": {
+              "type": "string",
+              "form": true,
+              "render": "slider",
+              "title": "CPU Request",
+              "sliderMin": 50,
+              "sliderMax": 1000,
+              "sliderUnit": "m"
+            }
+          }
+        }
+      }
+    },
+    "schedule": {
+      "type": "string",
+      "form": true,
+      "title": "cron",
+      "description": "When taking backups. default every 6 hours. example string: `0 */6 * * *`"
+    },
+    "mysql": {
+      "type": "object",
+      "form": true,
+      "title": "Variables",
+      "properties": {
+        "host": {
+          "type": "string",
+          "form": true,
+          "title": "MYSQL host"
+        },
+        "username": {
+          "type": "string",
+          "form": true,
+          "title": "MYSQL username"
+        },
+        "password": {
+          "type": "string",
+          "form": true,
+          "title": "MYSQL password"
+        }
+      }
+    },
+    "housekeeping": {
+      "type": "object",
+      "form": true,
+      "title": "Keep recent backups",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "form": true,
+          "title": "Enabled"
+        },
+        "keepDays": {
+          "type": "integer",
+          "title": "Days",
+          "form": true,
+          "hidden": {
+            "value": false,
+            "path": "housekeeping/enabled"
+          }
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "form": true,
+      "title": "Persistence Volume",
+      "properties": {
+        "size": {
+          "type": "string",
+          "title": "Persistent Volume Size",
+          "form": true,
+          "render": "slider",
+          "sliderMin": 1,
+          "sliderMax": 100,
+          "sliderUnit": "Gi"
+        }
+      }
+    }
+  }
+}

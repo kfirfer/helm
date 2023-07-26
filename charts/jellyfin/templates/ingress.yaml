@@ -1,0 +1,44 @@
+{{- if .Values.ingress.enabled -}}
+{{- $serviceName := include "jellyfin.fullname" . -}}
+{{- $labels := include "jellyfin.labels" . -}}
+{{- $commonAnnotations := .Values.ingress.commonAnnotations -}}
+{{- range $val := .Values.ingress.ingresses }}
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $val.name }}
+  labels:
+{{- $labels | nindent 4 }}
+{{ if or $commonAnnotations $val.annotations }}
+  annotations:
+{{ end }}
+{{- with $commonAnnotations }}
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- with $val.annotations }}
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if $val.tls }}
+  tls:
+  {{- range $val.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range $val.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: {{ $val.path }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: http
+  {{- end }}
+{{- end }}
+{{- end }}

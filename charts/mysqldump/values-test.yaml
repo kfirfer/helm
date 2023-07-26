@@ -1,0 +1,42 @@
+mysql:
+  host: "mysql-secondary"
+  username: backuper
+
+schedule: "0 */6 * * *"
+
+nodeSelector:
+  "kubernetes.io/arch": "amd64"
+  "kubernetes.io/os": "linux"
+
+# For ignore tables:
+# --ignore-table=nextcloud.oc_whats_new --ignore-table=nextcloud.oc_jobs
+options: "--opt --single-transaction --quick"
+
+podAnnotations:
+  "backup.velero.io/backup-volumes": "task-pv-storage"
+  "sidecar.istio.io/inject": "true"
+  "linkerd.io/inject": "enabled"
+  traffic.sidecar.istio.io/excludeOutboundPorts: "3306"
+
+jobPodAnnotations:
+  "sidecar.istio.io/inject": "false"
+  "linkerd.io/inject": "disabled"
+
+housekeeping:
+  enabled: true
+  keepDays: 10
+
+persistence:
+  size: 5Gi
+  annotations:
+    resize.topolvm.io/storage_limit: 2000Gi
+    resize.topolvm.io/threshold: 20%
+    resize.topolvm.io/increase: 10Gi
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    cpu: 2
+    memory: 2Gi

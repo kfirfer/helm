@@ -1,0 +1,16 @@
+apiVersion: v2
+appVersion: "8.0.20"
+description: A Helm chart for MySQL Cluster
+name: mysql-cluster
+version: 0.0.3
+keywords:
+- kubernetes
+- mysql
+- mysql-cluster
+home: https://github.com/kfirfer/helm/tree/master/charts/mysql-cluster
+icon: https://www.mysql.com/common/logos/logo-mysql-170x115.png
+maintainers:
+  - email: kfirfer@gmail.com
+    name: kfir
+annotations:
+  category: Database

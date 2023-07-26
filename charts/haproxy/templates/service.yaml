@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "haproxy.fullname" . }}
+  labels:
+    {{- include "haproxy.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+      name: tcp-port
+    - port: 8899
+      targetPort: 8899
+      protocol: TCP
+      name: http-web-port
+    {{- if .Values.metrics.enabled }}
+    - name: {{ .Values.metrics.portName }}
+      port: {{ .Values.metrics.port }}
+      protocol: TCP
+      targetPort: metrics-port
+    {{- end }}
+  selector:
+    {{- include "haproxy.selectorLabels" . | nindent 4 }}

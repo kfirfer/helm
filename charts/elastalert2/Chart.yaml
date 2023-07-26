@@ -1,0 +1,11 @@
+apiVersion: v1
+appVersion: 2.2.3
+description: Automated rule-based alerting for Elasticsearch
+home: https://github.com/jertel/elastalert2
+maintainers:
+- name: jertel
+- name: kfirfer
+name: elastalert2
+sources:
+- https://github.com/jertel/elastalert2
+version: 2.2.4

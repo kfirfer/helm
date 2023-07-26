@@ -1,0 +1,191 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___read-list
+rules:
+  - apiGroups: [ "*" ]
+    resources: [ "*" ]
+    verbs: [ "list" ]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___read-list-apprepositories
+rules:
+  - apiGroups: [ "*" ]
+    resources:
+      - "apprepositories"
+    verbs: [ "list" ]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___read-get-list-watch
+rules:
+  - apiGroups: [ "*" ]
+    resources: [ "*" ]
+    verbs: [ "get", "list", "watch" ]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___port-forward
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/portforward"]
+    verbs: ["get", "list", "create"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___exec-pods
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["get", "list", "create"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___rollout-deployments
+rules:
+  - apiGroups: ["apps", "extensions"]
+    resources: ["deployments"]
+    verbs: ["get", "patch"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___delete-pods
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "delete"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___admin
+rules:
+  - apiGroups: [ "*" ]
+    resources: [ "*" ]
+    verbs: [ "*" ]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___read-write
+rules:
+  - apiGroups:
+      - "*"
+    resources: [
+        "pods",
+        "serviceaccounts",
+        "cronjobs",
+        "replicasets",
+        "deployments",
+        "replicationcontrollers",
+        "statefulsets",
+        "configmaps",
+        "services",
+        "ingresses",
+        "jobs",
+        "events",
+        "secrets",
+        "apprepositories",
+        "pods/exec",
+        "pods/portforward",
+        "pods/log",
+        "podtemplates",
+        "horizontalpodautoscalers",
+        "restics",
+        "repositories",
+        "recoveries",
+        "persistentvolumeclaims",
+        "roles",
+        "rolebindings",
+        "poddisruptionbudgets",
+        "certificates",
+        "issuers",
+    ]
+    verbs:
+      - "*"
+  - apiGroups:
+      - "*"
+    resources:
+      - "endpoints"
+      - "daemonsets"
+      - "namespaces"
+      - "limitranges"
+      - "resourcequotas"
+      - "networkpolicies"
+    verbs: [ "get", "list", "watch" ]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-cluster-resources___read-only
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "componentstatuses"
+      - "nodes"
+      - "persistentvolumes"
+      - "mutatingwebhookconfigurations"
+      - "validatingwebhookconfigurations"
+      - "customresourcedefinitions"
+      - "apiservices"
+      - "tokenreviews"
+      - "selfsubjectaccessreviews"
+      - "selfsubjectrulesreviews"
+      - "subjectaccessreviews"
+      - "certificatesigningrequests"
+      - "runtimeclasses"
+      - "podsecuritypolicies"
+      - "clusterrolebindings"
+      - "clusterroles"
+      - "priorityclasses"
+      - "csidrivers"
+      - "csinodes"
+      - "storageclasses"
+      - "volumeattachment"
+      - "clusterserviceplans"
+      - "clusterservicebrokers"
+      - "clusterserviceclasses"
+    verbs: [ "get", "list", "watch" ]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-cluster-resources___admin
+rules:
+  - apiGroups: [ "*" ]
+    resources: [ "*" ]
+    verbs: [ "*" ]

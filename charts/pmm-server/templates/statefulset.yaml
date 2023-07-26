@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "pmm-server.fullname" . }}
+  labels:
+    {{- include "pmm-server.labels" . | nindent 4 }}
+spec:
+  podManagementPolicy: {{ .Values.podManagementPolicy }}
+  updateStrategy:
+    type: {{ .Values.updateStrategy }}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ template "pmm-server.fullname" . }}
+      {{- if .Values.persistence.labels.enabled }}
+      labels:
+         heritage: {{ .Release.Service | quote }}
+         release: {{ .Release.Name | quote }}
+         chart: "{{ .Chart.Name }}"
+         app: "{{ template "pmm-server.fullname" . }}"
+         {{- range $key, $value := .Values.labels }}
+         {{ $key }}: {{ $value | quote }}
+         {{- end }}
+    {{- end }}
+    {{- with .Values.persistence.annotations  }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    spec:
+{{ toYaml .Values.volumeClaimTemplate | indent 6 }}
+  {{- end }}
+  serviceName: {{ include "pmm-server.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "pmm-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "pmm-server.selectorLabels" . | nindent 8 }}
+        version: "{{ .Values.image.tag }}"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "pmm-server.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ template "pmm-server.fullname" . }}-env
+            - secretRef:
+                name: {{ template "pmm-server.fullname" . }}-secret-env
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+            - name: prometheus
+              containerPort: 9090
+              protocol: TCP
+          volumeMounts:
+            {{- if .Values.persistence.enabled }}
+            - name: "{{ template "pmm-server.fullname" . }}"
+              mountPath: /srv/prometheus/data
+              subPath: {{ ternary "data" (printf "%s/%s" .Values.persistence.subPath "data") (empty .Values.persistence.subPath) }}
+            - name: "{{ template "pmm-server.fullname" . }}"
+              mountPath: /srv/grafana
+              subPath: {{ ternary "grafana" (printf "%s/%s" .Values.persistence.subPath "grafana") (empty .Values.persistence.subPath) }}
+            - name: "{{ template "pmm-server.fullname" . }}"
+              mountPath: /var/log
+              subPath: {{ ternary "log" (printf "%s/%s" .Values.persistence.subPath "log") (empty .Values.persistence.subPath) }}
+            - name: "{{ template "pmm-server.fullname" . }}"
+              mountPath: /tmp
+              subPath: {{ ternary "tmp" (printf "%s/%s" .Values.persistence.subPath "tmp") (empty .Values.persistence.subPath) }}
+            - name: "{{ template "pmm-server.fullname" . }}"
+              mountPath: /var/tmp
+              subPath: {{ ternary "tmp" (printf "%s/%s" .Values.persistence.subPath "tmp") (empty .Values.persistence.subPath) }}
+            - name: "{{ template "pmm-server.fullname" . }}"
+              mountPath: /usr/tmp
+              subPath: {{ ternary "tmp" (printf "%s/%s" .Values.persistence.subPath "tmp") (empty .Values.persistence.subPath) }}
+            {{- end }}
+          {{ if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ping
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{ end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: var-tmp
+          emptyDir: {}
+        - name: usr-tmp
+          emptyDir: {}
+

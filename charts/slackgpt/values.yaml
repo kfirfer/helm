@@ -1,0 +1,370 @@
+# Default values for slackgpt.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  registry: docker.io
+  repository: kfirfer/slackgpt
+  pullPolicy: IfNotPresent
+  tag: "0.0.1"
+
+# -- Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries).
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+# -- Override the Kubernetes version, which is used to evaluate certain manifests
+kubeVersionOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+  ## opt in/out of automounting API credentials into container
+  ## https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  automountToken: true
+
+strategy:
+  rollingUpdate:
+    maxSurge: 50%
+    maxUnavailable: 50%
+
+annotations: {}
+
+command: []
+#  - /bin/sh
+#  - -ec
+#  - |
+#    keytool -import -alias redis-cert -file /app/conf/cert.pem -storepass changeit -keystore /usr/lib/jvm/default-jvm/lib/security/cacerts -noprompt && \
+#    java ${JVM_OPTS} -Djava.net.preferIPv4Stack=true -jar $JAR_NAME
+
+# Allows you to add any config files to /app/conf
+config: {}
+#  config.yaml:
+#    apps:
+#      - Cloud:
+#  someconf: >
+#    something
+
+env: {}
+
+secret:
+  OPENAI_TOKEN: ""
+
+containerPort: 8080
+
+service:
+  enabled: true
+  type: ClusterIP
+  name: http
+  port: 8080
+  protocol: TCP
+  nodePort:
+  annotations: {}
+
+debug:
+  enabled: false
+  port: 5005
+
+metrics:
+  enabled: false
+  port: 8081
+  serviceMonitor:
+    # When set true then use a ServiceMonitor to configure scraping
+    enabled: false
+    path: /actuator/prometheus
+    # Set the namespace the ServiceMonitor should be deployed
+    # namespace: monitoring
+    # Set how frequently Prometheus should scrape
+    # interval: 30s
+    # Set labels for the ServiceMonitor, use this to define your scrape label for Prometheus Operator
+    # labels: {}
+    # Set timeout for scrape
+    # timeout: 10s
+  annotations: {}
+#    prometheus.io/port: '9090'
+#    prometheus.io/scrape: 'true'
+#    prometheus.io/path: '/actuator/prometheus'
+  ## Custom PrometheusRule to be defined
+  ## The value is evaluated as a template, so, for example, the value can depend on .Release or .Chart
+  ## ref: https://github.com/coreos/prometheus-operator#customresourcedefinitions
+  prometheusRule:
+    # prometheusRule.enabled -- If true, creates a Prometheus Operator PrometheusRule.
+    enabled: false
+    # prometheusRule.additionalLabels -- Additional labels to be set in metadata.
+    additionalLabels: { }
+    # prometheusRule.namespace -- Namespace which Prometheus is running in.
+    namespace:
+    # prometheusRule.interval -- How often rules in the group are evaluated (falls back to `global.evaluation_interval` if not set).
+    interval: 30s
+    # prometheusRule.rules -- Rules spec template (see https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#rule).
+    rules: [ ]
+      # Example:
+      # - alert: PodDown
+      #   expr: |
+      #     pod_up{job="{{ include "slackgpt.fullname" . }}"} == 0
+      #   for: 5m
+      #   labels:
+      #     severity: critical
+      #   annotations:
+      #     description: App pod {{ "{{ $labels.pod }}" }} is down
+      #     summary: App pod {{ "{{ $labels.pod }}" }} is down
+
+livenessProbe:
+  enabled: false
+  initialDelaySeconds: 60
+  periodSeconds: 7
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 6
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8081
+
+readinessProbe:
+  enabled: false
+  initialDelaySeconds: 20
+  periodSeconds: 3
+  timeoutSeconds: 2
+  successThreshold: 1
+  failureThreshold: 3
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8081
+
+startupProbe:
+  enabled: false
+  initialDelaySeconds: 20
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 180
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8081
+
+# resources -- Specify resources on the container.
+## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+resources:
+  requests:
+    memory: "25Mi"
+    cpu: "10m"
+  limits:
+    memory: "2000Mi"
+    cpu: "2000m"
+
+## Configure PodDisruptionBudget
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+#
+podDisruptionBudget:
+  # -- Labels to be added
+  labels: {}
+  # -- Annotations to be added
+  annotations: {}
+
+  # -- Deploy a Poddisruptionbudget
+  enabled: false
+  # minAvailable: 1
+  # maxUnavailable: 0
+
+autoscaling:
+  enabled: false
+  minReplicas: 3
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 2000
+  targetMemoryUtilizationPercentage: 160
+  annotations: {}
+  behavior: {}
+    # scaleDown:
+    #   stabilizationWindowSeconds: 300
+    #  policies:
+    #   - type: Pods
+    #     value: 1
+    #     periodSeconds: 180
+    # scaleUp:
+    #   stabilizationWindowSeconds: 300
+    #   policies:
+    #   - type: Pods
+    #     value: 2
+  #     periodSeconds: 60
+
+autoscalingTemplate: []
+# Custom or additional autoscaling metrics
+# ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#support-for-custom-metrics
+# - type: Pods
+#   pods:
+#     metric:
+#       name: nginx_ingress_controller_nginx_process_requests_total
+#     target:
+#       type: AverageValue
+#       averageValue: 10000m
+
+# Enable vertical pod autoscaler support
+# ref: https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/FAQ.md
+verticalPodAutoscaler:
+  enabled: false
+  # Defaults to chart name
+  containerName: ""
+  # List of resources that the vertical pod autoscaler can control. Defaults to cpu and memory
+  controlledResources: []
+
+  # Define the max allowed resources for the pod
+  maxAllowed: {}
+  # cpu: 200m
+  # memory: 100Mi
+  # Define the min allowed resources for the pod
+  minAllowed: {}
+  # cpu: 200m
+  # memory: 100Mi
+
+  # Specifies whether recommended updates are applied when a Pod is started and whether recommended updates
+  # are applied during the life of a Pod. Possible values are "Off", "Initial", "Recreate", and "Auto".
+  updatePolicy: {}
+  # updateMode: Auto
+
+# Annotations to add to the deployment's pod template. Optional.
+podAnnotations: {}
+
+# Additional pod labels for deployment's template. Optional
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+terminationGracePeriodSeconds: 10
+
+ingress:
+  # -- Enable [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/).
+  enabled: false
+
+  # -- Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class).
+  className: ""
+
+  # -- Annotations to be added to the ingress.
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+
+  # -- Ingress host configuration.
+  # @default -- See [values.yaml](values.yaml).
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
+  # -- Ingress TLS configuration.
+  # @default -- See [values.yaml](values.yaml).
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+nodeSelector: {}
+
+lifecycle: {}
+#  preStop:
+#    exec:
+#      command: ["/bin/sh", "-c", "sleep 5"]
+
+tolerations: []
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Hard means that by default pods will only be scheduled if there are enough nodes for them
+# and that they will never end up on the same node. Setting this to soft will do this "best effort"
+antiAffinity: "soft"
+
+# Only used if you choose soft
+weight: 1
+
+antiAffinityTopologyKey: "kubernetes.io/hostname"
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+topologySpreadConstraints: >
+#  - labelSelector:
+#      matchLabels:
+#        app.kubernetes.io/instance: {{ .Release.Name }}
+#        namespace: {{ .Release.Namespace }}
+#    maxSkew: 1
+#    topologyKey: topology.kubernetes.io/zone
+#    whenUnsatisfiable: ScheduleAnyway
+
+# Init containers to add to deployment's pod spec. At least one plugin provider image is required.
+# If the value is a string then it is evaluated as a template.
+initContainers:
+# - name: plugin-for-csi
+#   image: velero/velero-plugin-for-csi:v0.3.0
+#   imagePullPolicy: IfNotPresent
+#   volumeMounts:
+#     - mountPath: /target
+#       name: plugins
+# - name: plugin-for-aws
+#   image: velero/velero-plugin-for-aws:v1.5.0
+#   imagePullPolicy: IfNotPresent
+#   volumeMounts:
+#     - mountPath: /target
+#       name: plugins
+
+# Configure the dnsPolicy of deployment
+# See: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+dnsPolicy: ClusterFirst
+
+# Extra volumes for deployment. Optional.
+extraVolumes: []
+#  - name: plugins
+#    emptyDir: {}
+
+# Extra volumeMounts for deployment. Optional.
+extraVolumeMounts: []
+#     - mountPath: /target
+#       name: plugins
+
+# -- Additional containers to be added to the pod.
+# See https://github.com/lemonldap-ng-controller/lemonldap-ng-controller as example.
+extraContainers: []
+#  - name: my-sidecar
+#    image: nginx:latest
+#  - name: lemonldap-ng-controller
+#    image: lemonldapng/lemonldap-ng-controller:0.2.0
+#    args:
+#      - /lemonldap-ng-controller
+#      - --alsologtostderr
+#      - --configmap=$(POD_NAMESPACE)/lemonldap-ng-configuration
+#    env:
+#      - name: POD_NAME
+#        valueFrom:
+#          fieldRef:
+#            fieldPath: metadata.name
+#      - name: POD_NAMESPACE
+#        valueFrom:
+#          fieldRef:
+#            fieldPath: metadata.namespace
+#    volumeMounts:
+#    - name: copy-portal-skins
+#      mountPath: /srv/var/lib/lemonldap-ng/portal/skins
+
+## @param extraDeploy Array of extra objects to deploy with the release (evaluated as a template)
+##
+extraDeploy: []
+
+tests:
+  image:
+    registry: docker.io
+    repository: busybox
+    pullPolicy: IfNotPresent
+    tag: "1-musl"
+
+
+

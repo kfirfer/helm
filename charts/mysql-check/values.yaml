@@ -1,0 +1,72 @@
+# Default values for mysql-check.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: kfirfer/mysql-client
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "0.0.2"
+  pullSecret: ""
+
+cronjob:
+  # At 04:00 every day
+  schedule: "0 4 * * *"
+  annotations: {}
+  labels: {}
+  concurrencyPolicy: "Forbid"
+  failedJobsHistoryLimit: "3"
+  successfulJobsHistoryLimit: "1"
+  jobRestartPolicy: Never
+  backoffLimit: 1
+
+nameOverride: ""
+fullnameOverride: ""
+
+secret:
+  MYSQL_HOST: "mysql-primary"
+  MYSQL_USER: "root"
+  MYSQL_PASSWORD: "password_here"
+  SLEEP_BEFORE_RUN_SECONDS: "5"
+
+rbac:
+  # Specifies whether RBAC should be enabled
+  enabled: true
+
+command:
+  - sh
+  - -c
+  - >-
+    sleep ${SLEEP_BEFORE_RUN_SECONDS} && mysqlcheck --all-databases --skip-database=mysql --auto-repair --optimize --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASSWORD}  && echo "Finished"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  ## opt in/out of automounting API credentials into container
+  ## https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  automountToken: true
+
+securityContext:
+  runAsUser: 16  # run as cron user instead of root
+
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+
+pod:
+  annotations: {}
+  labels: {}
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

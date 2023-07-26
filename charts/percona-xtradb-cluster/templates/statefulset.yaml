@@ -1,0 +1,409 @@
+apiVersion: {{ template "percona-xtradb-cluster.statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ template "percona-xtradb-cluster.fullname" . }}
+  labels:
+    app: {{ template "percona-xtradb-cluster.fullname" . }}
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.replicas }}
+  updateStrategy:
+    type: {{ .Values.updateStrategy }}
+  selector:
+    matchLabels:
+      app: {{ template "percona-xtradb-cluster.fullname" . }}
+      release: "{{ .Release.Name }}"
+  serviceName: {{ template "percona-xtradb-cluster.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "percona-xtradb-cluster.fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+        version: "{{.Values.image.tag }}"
+    {{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+    {{- end }}
+    spec:
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- with .Values.serviceAccount.serviceAccountName }}
+      serviceAccountName: "{{ . }}"
+      {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountToken }}
+      {{- with .Values.securityContext }}
+      securityContext:
+        {{ . | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
+      containers:
+      - name: database
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        {{- if .Values.command }}
+        command:
+{{ toYaml .Values.command | indent 10 }}
+        {{- end }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        env:
+        {{- if .Values.mysqlAllowEmptyPassword }}
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "true"
+        {{- else }}
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "percona-xtradb-cluster.fullname" . }}
+              key: mysql-root-password
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "percona-xtradb-cluster.fullname" . }}
+              key: mysql-password
+        {{- end }}
+        - name: XTRABACKUP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "percona-xtradb-cluster.fullname" . }}
+              key: xtrabackup-password
+        - name: MYSQL_USER
+          value: {{ default "" .Values.mysqlUser | quote }}
+        - name: MYSQL_DATABASE
+          value: {{ default "" .Values.mysqlDatabase | quote }}
+        - name: ALLOW_ROOT_FROM
+          value: {{ .Values.allowRootFrom | quote }}
+        - name: CLUSTER_NAME
+          value: {{ template "percona-xtradb-cluster.fullname" . }}
+        - name: SHORT_CLUSTER_NAME
+          value: {{ template "percona-xtradb-cluster.shortname" . }}
+        - name: K8S_SERVICE_NAME
+          value: {{ template "percona-xtradb-cluster.fullname" . }}-repl
+        - name: PXC_STRICT_MODE
+          value: {{ default "ENFORCING" .Values.pxcStrictMode | quote }}
+        - name: DEBUG
+          value: "true"
+        ports:
+        - name: mysql
+          containerPort: 3306
+        - name: galera-repl
+          containerPort: 4567
+        - name: state-transfer
+          containerPort: 4568
+        - name: state-snapshot
+          containerPort: 4444
+        {{ if .Values.livenessProbe.enabled }}
+        livenessProbe:
+          exec:
+            command:
+              - "/bin/bash"
+              - "-c"
+              - "mysqladmin ping || test -e /var/lib/mysql/sst_in_progress"
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+        {{ end }}
+        {{ if .Values.readinessProbe.enabled }}
+        readinessProbe:
+          exec:
+            command: ["mysql", "--defaults-extra-file=/root/.my.cnf", "-h", "127.0.0.1", "-e", "SELECT 1"]
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+        {{ end }}
+        {{- with .Values.lifecycle }}
+        lifecycle:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        - name: mysql-startup-scripts
+          mountPath: /startup-scripts
+        - name: mysql-config-files
+          mountPath: /etc/mysql/conf.d
+        - name: slash-root
+          mountPath: /root
+        - name: mysql-log
+          mountPath: /var/log
+        {{- if .Values.ssl.enabled }}
+        - name: certificates
+          mountPath: /cert
+        {{- end }}
+      {{ if .Values.logTail.enabled }}
+      - name: "logs"
+        image: "busybox:1.33.1"
+        resources:
+          {{- toYaml .Values.logTail.resources | nindent 12 }}
+        imagePullPolicy: IfNotPresent
+        {{- with .Values.lifecycle }}
+        lifecycle:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+        command:
+          - /bin/sh
+          - "-c"
+          - |
+            echo "touch logs"
+            touch /var/log/mysqld.log
+            echo "finish touch logs"
+            tail -f /var/log/mysqld.log | grep -v mbind:
+        volumeMounts:
+        - name: mysql-log
+          mountPath: /var/log
+      {{ end }}
+        {{ if .Values.auditTail.enabled }}
+      - name: "audit"
+        image: "busybox:1.33.1"
+        resources:
+        {{- toYaml .Values.auditTail.resources | nindent 12 }}
+        imagePullPolicy: IfNotPresent
+        {{- with .Values.lifecycle }}
+        lifecycle:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+        command:
+          - /bin/sh
+          - "-c"
+          - |
+            echo "touch audit logs"
+            touch /var/log/audit.log
+            echo "finish touch logs"
+            tail -f /var/log/audit.log
+        volumeMounts:
+          - name: mysql-log
+            mountPath: /var/log
+        {{ end }}
+      {{ if .Values.healthcheck.enabled }}
+      - name: "healthcheck"
+        image: "{{ .Values.healthcheck.image }}:{{ .Values.healthcheck.tag }}"
+        imagePullPolicy: IfNotPresent
+        resources:
+          {{- toYaml .Values.healthcheck.resources | nindent 12 }}
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "percona-xtradb-cluster.fullname" . }}
+              key: mysql-root-password
+        ports:
+        - name: healthcheck
+          containerPort: 8081
+        command:
+         - /bin/sh
+         - "-c"
+         - |
+           python /startup-scripts/mysql_health_check.py
+        volumeMounts:
+          - name: mysql-startup-scripts
+            mountPath: /startup-scripts
+        {{- with .Values.lifecycle }}
+        lifecycle:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{ end }}
+      {{- if .Values.pmm.enabled }}
+      - name: pmm-client
+        image: "{{ .Values.pmm.image.repository }}:{{ .Values.pmm.image.tag }}"
+        imagePullPolicy: {{ .Values.metrics.imagePullPolicy | quote }}
+        securityContext:
+          runAsUser: 1002
+          runAsNonRoot: true
+        env:
+          - name: PMM_AGENT_SERVER_ADDRESS
+            value: "{{.Values.pmm.server.url}}:{{.Values.pmm.server.port}}"
+          - name: PMM_AGENT_SERVER_USERNAME
+            value: "{{ .Values.pmm.user }}"
+          - name: PMM_AGENT_SERVER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "percona-xtradb-cluster.fullname" . }}
+                key: pmm-server-password
+          - name: DB_TYPE
+            value: "mysql"
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_USER
+            value: "root"
+          - name: PMM_AGENT_SERVER_INSECURE_TLS
+            value: "true"
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "percona-xtradb-cluster.fullname" . }}
+                key: mysql-root-password
+        volumeMounts:
+          - name: mysql-log
+            mountPath: /var/log
+          - name: mysql-startup-scripts
+            mountPath: /tmp/startup-scripts
+          - name: pmm-config
+            mountPath: /usr/local/percona/pmm2/config
+        command:
+          - /bin/bash
+          - "-c"
+          - |
+            pmm-agent setup --force --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml
+            pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --json &
+            while true
+            do
+            (pmm-admin add mysql --query-source=slowlog --username=$DB_USER --password=$DB_PASSWORD --json && sleep infinity) || (echo "sleeping for 10 seconds" && sleep 10)
+            done
+      {{- end }}
+      {{- if .Values.metrics.enabled }}
+      - name: metrics
+        image: "{{ .Values.metrics.image }}:{{ .Values.metrics.imageTag }}"
+        imagePullPolicy: {{ .Values.metrics.imagePullPolicy | quote }}
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "percona-xtradb-cluster.fullname" . }}
+                key: mysql-root-password
+       {{- if .Values.mysqlAllowEmptyPassword }}
+          - name: DATA_SOURCE_NAME
+            value: "root@(localhost:3306)/"
+        {{- else }}
+          - name: DATA_SOURCE_NAME
+            value: "root:{{.Values.mysqlRootPassword}}@(localhost:3306)/"
+        {{- end }}
+        command:
+          - "./bin/mysqld_exporter"
+          {{- range $f := .Values.metrics.flags }}
+          - {{ $f | quote }}
+          {{- end }}
+        ports:
+          - name: http-metrics
+            containerPort: 9104
+        {{ if .Values.metrics.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http-metrics
+          initialDelaySeconds: {{ .Values.metrics.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.metrics.livenessProbe.timeoutSeconds }}
+        {{ end }}
+        {{ if .Values.metrics.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http-metrics
+          initialDelaySeconds: {{ .Values.metrics.readinessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.metrics.readinessProbe.timeoutSeconds }}
+        {{ end }}
+        {{- with .Values.lifecycle }}
+        lifecycle:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+        resources:
+{{ toYaml .Values.metrics.resources | indent 10 }}
+      {{- end }}
+      volumes:
+      - name: pmm-config
+        emptyDir: {}
+      - name: slash-root
+        emptyDir: {}
+        {{- if not .Values.persistence.logs.enabled }}
+      - name: mysql-log
+        emptyDir: {}
+        {{ end }}
+      - name: mysql-config-files
+        configMap:
+          name: {{ template "percona-xtradb-cluster.fullname" . }}-config-files
+      - name: mysql-startup-scripts
+        configMap:
+          name: {{ template "percona-xtradb-cluster.fullname" . }}-startup-scripts
+      {{- if not .Values.persistence.enabled }}
+      - name: mysql-data
+        emptyDir: {}
+      {{- end -}}
+      {{- if .Values.ssl.enabled }}
+      - name: certificates
+        secret:
+          secretName: {{ .Values.ssl.secret }}
+      {{- end }}
+      affinity:
+      {{- if eq .Values.antiAffinity "hard" }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - "{{ template "percona-xtradb-cluster.fullname" . }}"
+              topologyKey: {{ .Values.antiAffinityTopologyKey }}
+        {{- else if eq .Values.antiAffinity "soft" }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                topologyKey: {{ .Values.antiAffinityTopologyKey }}
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - "{{ template "percona-xtradb-cluster.fullname" . }}"
+        {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      {{- end -}}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end -}}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-data
+      {{- with .Values.persistence.annotations  }}
+      annotations:
+{{ toYaml . | indent 10 }}
+      {{- end }}
+    spec:
+      accessModes: [{{ .Values.persistence.accessMode | quote }}]
+      {{- if .Values.persistence.storageClass }}
+      {{- if (eq "-" .Values.persistence.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.persistence.storageClass }}"
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size | quote }}
+    {{- if .Values.persistence.logs.enabled }}
+  - metadata:
+      name: mysql-log
+      {{- with .Values.persistence.logs.annotations  }}
+      annotations:
+{{ toYaml . | indent 10 }}
+    {{- end }}
+    spec:
+      accessModes: [{{ .Values.persistence.logs.accessMode | quote }}]
+      {{- if .Values.persistence.logs.storageClass }}
+      {{- if (eq "-" .Values.persistence.logs.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.persistence.logs.storageClass }}"
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.logs.size | quote }}
+  {{- end -}}
+{{ end }}

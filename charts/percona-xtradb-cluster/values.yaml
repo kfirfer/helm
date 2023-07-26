@@ -1,0 +1,451 @@
+# Default values for Percona XtraDB Cluster
+
+## percona image and version
+## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
+image:
+  repository: "percona/percona-xtradb-cluster"
+  tag: "8.0.32-24.2"
+  pullPolicy: IfNotPresent
+
+# Desired number of members of xtradb cluster
+replicas: 3
+
+imagePullSecrets: []
+
+## Specify password for root user
+##
+mysqlRootPassword: ""
+
+## Specify password for xtradb backup user, default: 10 random characters
+##
+xtraBackupPassword: ""
+
+## Uncomment to create a database user
+##
+# mysqlUser: test
+# mysqlPassword: test
+
+## Allow unauthenticated access, uncomment to enable
+##
+# mysqlAllowEmptyPassword: true
+
+## Create a database
+##
+mysqlDatabase: ""
+
+## Configure pxc_strict_mode
+## ref: https://www.percona.com/doc/percona-xtradb-cluster/LATEST/features/pxc-strict-mode.html
+pxcStrictMode: PERMISSIVE
+
+terminationGracePeriodSeconds: 5
+
+livenessProbe:
+  enabled: false
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 6
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+updateStrategy: RollingUpdate
+
+command:
+  - "/bin/bash"
+  - "/startup-scripts/entrypoint.sh"
+
+## hosts to allow root user access from
+# set to "127.0.0.1" to deny remote root.
+allowRootFrom: "%"
+
+persistence:
+  enabled: true
+  ## percona data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  accessMode: ReadWriteOnce
+  size: 8Gi
+  annotations: {}
+
+  logs:
+    enabled: false
+    ## percona logs Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 3Gi
+    annotations: {}
+
+nodeSelector: {}
+
+# Annotations to be added to pods
+podAnnotations: {}
+
+## List of node taints to tolerate (requires Kubernetes >= 1.6)
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+##
+tolerations: []
+
+# By default this will make sure two pods don't end up on the same node
+# Changing this to a region would allow you to spread pods across regions
+antiAffinityTopologyKey: "kubernetes.io/hostname"
+
+# Hard means that by default pods will only be scheduled if there are enough nodes for them
+# and that they will never end up on the same node. Setting this to soft will do this "best effort"
+antiAffinity: "hard"
+
+lifecycle:
+  preStop:
+    exec:
+      command: ["/bin/sh", "-c", "sleep 5"]
+
+resources: {}
+
+configFiles: {}
+#  node.cnf: |+
+
+pmm:
+  enabled: false
+  image:
+    repository: perconalab/pmm-client
+    tag: 2.38.1
+  user: admin
+  password: admin
+  server:
+    url: "pmm-server"
+    port: "4431"
+
+metrics:
+  enabled: false
+  image: prom/mysqld-exporter
+  imageTag: v0.15.0
+  imagePullPolicy: IfNotPresent
+  resources: {}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9104"
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: 60
+    timeoutSeconds: 5
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 30
+    timeoutSeconds: 2
+  flags:
+    - "--collect.binlog_size"
+    - "--collect.engine_innodb_status"
+    - "--collect.global_status"
+    - "--collect.global_variables"
+    - "--collect.auto_increment.columns"
+    - "--collect.info_schema.innodb_metrics"
+    - "--collect.info_schema.innodb_cmpmem"
+    - "--collect.info_schema.innodb_cmp"
+    - "--collect.info_schema.tablestats"
+    - "--collect.info_schema.query_response_time"
+    - "--collect.info_schema.tables"
+    - "--collect.info_schema.processlist"
+    - "--collect.perf_schema.indexiowaits"
+    - "--collect.perf_schema.eventsstatements"
+    - "--collect.perf_schema.tableiowaits"
+    - "--collect.perf_schema.eventsstatementssum"
+    - "--collect.perf_schema.tablelocks"
+    - "--collect.perf_schema.file_events"
+    - "--collect.perf_schema.eventswaits"
+    - "--collect.perf_schema.file_instances"
+    - "--collect.perf_schema.replication_group_member_stats"
+    - "--collect.perf_schema.replication_applier_status_by_worker"
+
+prometheus:
+  ## Are you using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/user-guides/getting-started.html)?
+  operator:
+    ## Setting to true will create Prometheus-Operator specific resources like ServiceMonitors
+    enabled: false
+
+    ## Configures alerts for Prometheus to pick up
+    prometheusRule:
+      enabled: false
+
+      ## Labels to add to alerts
+      labels: {}
+
+      ## Namespace which Prometheus is installed in
+      namespace: kube-system
+
+      ## Label Selector for Prometheus to find alert rules
+      # selector:
+      #   prometheus: kube-prometheus
+
+    ## Configures targets for Prometheus to pick up
+    serviceMonitor:
+      ## Interval at which Prometheus will scrape metrics exporter
+      interval: 30s
+
+      ## Namespace which Prometheus is installed in
+      namespace: ""
+
+      ## Label Selector for Prometheus to find ServiceMonitors
+      # selector:
+      #   prometheus: kube-prometheus
+
+## When set to true will create sidecar to tail mysql log
+logTail:
+  enabled: true
+  resources: {}
+#    requests:
+#      cpu: 10m
+#      memory: 25Mi
+#    limits:
+#      cpu: 1
+#      memory: 250Mi
+
+auditTail:
+  enabled: false
+  resources: {}
+#    requests:
+#      cpu: 10m
+#      memory: 25Mi
+#    limits:
+#      cpu: 1
+#      memory: 250Mi
+
+# Expose health check sidecar container for external components, such as HAproxy
+healthcheck:
+  enabled: true
+  image: kfirfer/percona-xtradb-healthcheck
+  tag: 0.0.1
+  resources: {}
+
+ssl:
+  enabled: true
+  secret: mysql-ssl-certs
+  certificates:
+    - name: mysql-ssl-certs
+      ca: |-
+        -----BEGIN CERTIFICATE-----
+        MIIDCTCCAfGgAwIBAgIBATANBgkqhkiG9w0BAQsFADA/MT0wOwYDVQQDDDRNeVNR
+        TF9TZXJ2ZXJfOC4wLjE5LTEwX0F1dG9fR2VuZXJhdGVkX0NBX0NlcnRpZmljYXRl
+        MB4XDTIwMDgxNDIyMTA0OFoXDTMwMDgxMjIyMTA0OFowPzE9MDsGA1UEAww0TXlT
+        UUxfU2VydmVyXzguMC4xOS0xMF9BdXRvX0dlbmVyYXRlZF9DQV9DZXJ0aWZpY2F0
+        ZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKrAYlBMTjkTm0XQZtou
+        v2P6mWkKNIg5vBxPvcOkXEOvWjWQUYBbIWXRvrVu2OJIh2msjtX+sOy71En6BkEr
+        /c9rISOqgQjvFslY+irUKuTjaq29OdsWpJ6Cphr0B/HjMqVIWmuLb3JugM7raGQk
+        9BRDOp7PsTQGTAW4UuKI1RN5uRlskR24dAgN+LzBY4zgi7kFSLfrIDkrAFP+rRjG
+        gdBzuPp0a5XpBiG3HmuvwyniRLKAtw8XWLNynrIEaZZO2cnMTueePc97GCx5AhYF
+        ++kVgvsNH0DwsNPM8Ri91P02+8H4/V8g/YQWRTaMUMIdAT0HHzZaK5UbkBG9oDSo
+        b1UCAwEAAaMQMA4wDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAH2Wb
+        7q5Z+zw5g8ev+JLAvpEB0bBwoJi+mn//NkKl6ip3vF+dOIpv4HsPvfrPhfFTz7nN
+        S3bWS7kxwNNc06on8fEFx4GmhoZgk/LIygl6KmjEjyX8LvpiD2C62ZuoLhYBFodo
+        w3CUMjoz6TX2FLe19edU/1XlAX2Dua8pmPFWhFPcyyNoukDQZFPrkVgZz6bNxLUQ
+        OjZMijgaZm4rM4lYJCG3Prw3TxwdOKJTUHPIuzIDUht4FxSQb8O8g0SiAgkRyEr3
+        yYC8XeTiOEUhYyXQ0mMJvCpm6Sdw9osTMcYToNuCu53QQ8b33ESbpfa/NQe9HpMm
+        n8OFc0tn5C9oWXkjmg==
+        -----END CERTIFICATE-----
+      cakey: |-
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEpAIBAAKCAQEAqsBiUExOORObRdBm2i6/Y/qZaQo0iDm8HE+9w6RcQ69aNZBR
+        gFshZdG+tW7Y4kiHaayO1f6w7LvUSfoGQSv9z2shI6qBCO8WyVj6KtQq5ONqrb05
+        2xaknoKmGvQH8eMypUhaa4tvcm6AzutoZCT0FEM6ns+xNAZMBbhS4ojVE3m5GWyR
+        Hbh0CA34vMFjjOCLuQVIt+sgOSsAU/6tGMaB0HO4+nRrlekGIbcea6/DKeJEsoC3
+        DxdYs3KesgRplk7ZycxO5549z3sYLHkCFgX76RWC+w0fQPCw08zxGL3U/Tb7wfj9
+        XyD9hBZFNoxQwh0BPQcfNlorlRuQEb2gNKhvVQIDAQABAoIBACgKRQOfYRhxSI/u
+        dq/jFm5TbXX8NqVbJIlfCZi/CgO1MuoslXAL7qD5tkbFX4Zwi5B0Lmpv9v0MbpOK
+        Vb0im7nv3S2H5go6RpWgj8lLR2O1EGb9YHvHq4KgEGNxpgtKw62OceWWJOQolXvw
+        J+KT58h4m15yRZN1ho4w0v7cJ1sRZd2epWGKeQXIr+1pdlUndqpb2dr0HWyABjkE
+        a9USsxhUbtG4BjDtgSFwBUtOb8E/VPS9rC5LaBCIBRXkm62VArBXDbk8yFF1oHK7
+        c4CfamagswqtIM7oK4dMFZlqvSPGkAXszM5nujWCHHhWkRWFfbvDXonYorhZwFWv
+        lb23lgECgYEA3skJwQ/VaGGUkSkgrUKp48PH6s24OwRz6N4Fjvvl9oZ7DQ7y4hxo
+        VFxgxUZMfG67tMJ8ywYB43077RMaP5hVpnW34o1/q+JeNdkUlyltO+L6CMXXmEcT
+        TfjR4iXXUWklVKj0QUUyOTnTJkC41EkVDNheVBGtEitjli6StEw36DECgYEAxDVk
+        OodtEHGKO+XUFu3l98CxGl60jgqDVwKn4Q2Tg8aUvOAQh9wOc/Q6Hg4BJJ7p9QRc
+        ZNb7w+e4RBzSJn2g+atWsAuV0LkKdj4jag6HxnP/mO+CXMwjk19RdxHP4hZW4v3i
+        tPwjqYzSet8e49FGiNQMtABxMA0otLuW8QRWFGUCgYEAwBh+tZ5ud9Nz4/qfd2W8
+        0WyV68s4aIL9YrRV/KUM85WfcnIKUZcHCn6g3lkwSDa+2Sy9p91lMX9hdZj8EAvN
+        BnwIc2tow4+rhijIzVJmIrYiu//DV0UpyxiZ+LKCR2svSiFogwMkPB21CA3UkQ72
+        /J1wMHMRVVJeSzebPaVeq3ECgYAAs1gaRWWES4N810M8mbjae5umRnRKlYsGgoHq
+        8ct3Cvx4+CvW8Fg03chfVxl18gNP1qYlzga0Gl20EI5HiOdMPOpgUopEZoS9C1fB
+        BzBA6yUcfK5wemIeIpb939hoLEA/Kzzl/Ih8EH6n5agMlDC2SFuLQP0meMWOb6UI
+        U0WjaQKBgQCVYAdeT3NtmxIeC7/ouSvX5SPOOjijUlnn1CtfrfspVMQTgubyH1Ra
+        OUyK/2bTsAq8fC/R1JDMIR1VdzKRkX3cRS0HHxA8LNBvTrEZumLl38cznm0nFD5T
+        TTTGHjYO5P0QG5gBgLoO8PfUs8y4ncPDFpZa0ukXL+Xa8tej273CdA==
+        -----END RSA PRIVATE KEY-----
+      clientcert: |-
+        -----BEGIN CERTIFICATE-----
+        MIIDCjCCAfKgAwIBAgIBAzANBgkqhkiG9w0BAQsFADA/MT0wOwYDVQQDDDRNeVNR
+        TF9TZXJ2ZXJfOC4wLjE5LTEwX0F1dG9fR2VuZXJhdGVkX0NBX0NlcnRpZmljYXRl
+        MB4XDTIwMDgxNDIyMTA0OVoXDTMwMDgxMjIyMTA0OVowQzFBMD8GA1UEAww4TXlT
+        UUxfU2VydmVyXzguMC4xOS0xMF9BdXRvX0dlbmVyYXRlZF9DbGllbnRfQ2VydGlm
+        aWNhdGUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCjJoQRevYjxjTy
+        wZKgn13RANlAnUAeftz22LK2biSqma/d88AVj7vrXF2Ca07H4VraEk4f065ZGG+2
+        +HfqtD3scbq3FeGJshH+NymxFe/lcMgTDMi9v4xp9e2/EI+7P28fTtWSmBOQhBhb
+        rANavWyAnXphF41ioADxpZoZ0jGS/4aftXUndL0wuQVTng1uy2kLtTOOfp/MoCAd
+        uwUijgoVe3lx0LwZdGaw4//4oj4LFZjPe1U5c/ZolV3ONxShONJpSz5gMfbGlyv/
+        5EF7vLDFSr8TTanfa9wAyq7iAjJ+IufYfoobznjwqioE8w0h5+7gbX6KVj7sE5Qb
+        bbfsUyDXAgMBAAGjDTALMAkGA1UdEwQCMAAwDQYJKoZIhvcNAQELBQADggEBAJdO
+        njV/kutfZFox/N9lQEBFrxB/OUsggFHQ/7XEooEKRsvSsCzQeyPBmpAKhsWfTX4I
+        6pE6DQCjikKkYJ24Er07GG5uLv8G54y3X/+vT8kW5oRfyWsi8Wl9SU3Zcgp/kCEE
+        yFcNZMNqkDY41lTfQd9AdwevVeCrX6w+tjoUPAxMuLQWIGp9c2pn04XS3fg+zUCP
+        j2bWf4/Vq0L/GpXL2G2AU8fTuXQInZqPBBHpEfYoX0iAl8e9JcHiChJpsQR/bXM9
+        nzeiWhRIfsNu3NNMthQn9l/N71l3CcKn1CH6FSxK01prPag5ffQ5BI3p5CVhds0M
+        BwCRgEEMuwsx9wuzFdw=
+        -----END CERTIFICATE-----
+      clientkey: |-
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEowIBAAKCAQEAoyaEEXr2I8Y08sGSoJ9d0QDZQJ1AHn7c9tiytm4kqpmv3fPA
+        FY+761xdgmtOx+Fa2hJOH9OuWRhvtvh36rQ97HG6txXhibIR/jcpsRXv5XDIEwzI
+        vb+MafXtvxCPuz9vH07VkpgTkIQYW6wDWr1sgJ16YReNYqAA8aWaGdIxkv+Gn7V1
+        J3S9MLkFU54NbstpC7Uzjn6fzKAgHbsFIo4KFXt5cdC8GXRmsOP/+KI+CxWYz3tV
+        OXP2aJVdzjcUoTjSaUs+YDH2xpcr/+RBe7ywxUq/E02p32vcAMqu4gIyfiLn2H6K
+        G8548KoqBPMNIefu4G1+ilY+7BOUG2237FMg1wIDAQABAoIBABa1a7iLJut/0Srg
+        6qnUxNgsiBDIUn5sJhFtxCJEXnIohiQco2Xc5ckyyAk5KnQD2AN2fM1NR307O4F6
+        QCa5A81/Xv/Q2d2ynXKG9xSg+w0yj4anRuGyYbb19iucAIWNpMf0zyFibYa1/DX2
+        UVk1+H5GbRxKjPFnV/pKlJJ3gVL2aS3XKZfh1VuV7dlUFMHnE7iHFWOlFJgBDLaa
+        B+K1AmXPpUaQ0hACdjWG5bPsCMsHMPtvBUgxD4bETkghx41/b9sPvlgbPHgvefoo
+        jLB07wjA7tQU+aNVoebV3bQ4Zmi348l2YA1Y1Q8agtPm3hIumAzKye1dhlObTVFb
+        SfJ7qzECgYEA1uEx0C77Jxo0jaE9FTeguHWRnDfgeuKis+cdkQ4gnRa/Hwhm6cf2
+        feIQL7jcvrodPPFzK6BUCGNW95D8fNcbOwfTnXqitAXCBmT/H+28TMA/DXaso8Te
+        2uJ9crMqfcOYHdOyWzgbDWdIBAvwi7taWsAKm/H9hZmEDMNoDtK/3RMCgYEAwl8k
+        orI3/nJALPR/5Muvqu27ednGmxbYo4Jd9X2HuAPl+DzmsFZqmGBy2Ih29EHfRPMU
+        bzgR2XuCnyQGkjJuCnxAaknQ6hZRL3AN9++Bqvltl8OzGtzGOGQwCIryH+bf+jHd
+        Jb+V8QLM5+Ismi4DcOU0Kpph8AP96BcQoAN4ua0CgYBdtO8oPpTARKlOalZc/llU
+        l9DcM3HtpRAXLF60d1i5qMXIHr3ijZVs6Dzu0stRUZCWlyUGjXCYB9pRNCUnvBbf
+        81XRgz2ZDDnE2B56Kg7H2b6lfG9lK+GTytmyP3f0SGv59ev948XIXpYFTb+k8BtD
+        ICSARVOuA3iWqFCkxjttiQKBgFFhImaX9Yer8CCiUbXKbgdDt72hp1yhqRx0ZcB1
+        yVALGcrgPLnRxJl9sDfmkt9bgQ5OM90I/bgv1RWqMLIfOSFcul+F/lkz9NPGt6J5
+        /bFG81KaVi/GBZvwnofFHPCsalRHck7usumQgZgIgyIeZ8Rpwnif4KdsFG+K0KQe
+        L/qVAoGBAJKBFnzahFdSbBYbTl3K7AIFZoZ6aUAIm55LoAXbVRSOKt9gYT/V7Njc
+        C5daeComb1IRYCez6zU0DvNKjqgfuKcpIn29roeMbwkf5Lm7OLyJgrtcZzoASzUK
+        sNDE3uiuazaRX/qRF6vOAKGZ0GJZesa1Fyfkza7FlTdAkgdsOXXD
+        -----END RSA PRIVATE KEY-----
+      privatekey: |-
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEpAIBAAKCAQEAwNEIiHQpJklkxsGOG5KFQthXOW3ZANlWdHupVW+5k10eIp1E
+        bFariLL9rHQcMIXaCpMc71WML3+mQWkfioA/CiJgsyd5HdzHsy1PeulcEMfntUxM
+        4PVDdCNt3UtBcWavjyIlPh/lgpsMxBaJWU5Gy3zo7IJK8E820SOyjgXnqgl1THJS
+        Z2fUHLTTmBmeq8B3ZUYeH9VrOZYYqt0EhS28EYBQGYmGGGD02YarGyizoGrn15/J
+        diZ5M/QFlddOKGT6YCD6pilGbRi2Y/SFPkbaSj1JBN8lnQlHRLHt5kZ7hCln78g6
+        ++2K15ZhUorTlZoqsqSqmS/7yojRhmd7qqljZwIDAQABAoIBAQCUNtpxUaFj/dzK
+        b3RWO33WUUhTK944KdisN3aF5xjmbxjAENXM1Z6LuNMIYkRdBDcEE+uVCdR1mpDp
+        DO6i30wV9TER5dDTJKgZUkYbPBB6EcBJ+3nJHp8YQjeseLG4gu+Gff/Uzl301Eyu
+        2of/rwz6VG0TiGAkcy+2+dLCG0XlzIG7e8XMr8jAeMbvZqPkrvlFlS2TTQ6Q7l0z
+        ws/UPob1UcPZbMQPgBPu4+vRRBwLHUPbpt6encE95BiuvNgrAIwLgdL2sn4gOe45
+        j0ZN0cGn4/8v4YUi+1DNibY+kGCcmMvXRYLDsQ4EaycrFnVCT1blqC575IbU8NyC
+        cF0DaC5ZAoGBAPhyf8SVO46M79cTuNowT/WSg20VmECE02MUh9G6AC4s0ndnTchY
+        hFQ/ViPcruUesQRYj8l1GfE/UvEMc1dheOfTCCLr8KkV3axX8eeVmuS/0iD1LkOF
+        ZIJ6HfXB43pWMOZCIkI3cgZPaybWr4n/q9Op1X1tj0jGgIwx2C6Y6twDAoGBAMat
+        mNh39bzp76pXHM22xh5UzGwUQHCqa3Iq+267Wg21ZTp06iWwWhEHlruMgrFl0OIn
+        uuVK0/j/26dkoxbRXdDIonzlDrOn5aEL8lrrrv7eDLPs07aDrY0Lxf1LJtjD26aJ
+        EY5PbpDjXnWBoE7Cj3bBGerJuqHsdb5F2qEwBmfNAoGAYoAKteawoRixciUIkcC7
+        wtHet13rahD/OfYGzxieP7BXlS1owjiN5lTiEv/Ie2BKsD1obGe37FS9zoGwLQGh
+        DNA3FplSZccchtqrNrSyn2SJq7VpLS3ypmRCApBnXrZTVsb7jCMtWuEby18sY1rx
+        Rc68rKjGOQUyK+MLIZZQ7v8CgYAfACNjU4SCj7YXzDPwXV6YiP7Etnw/mDffvpkw
+        9AbfMLi04F1QuC21jouUhB44c/yd7TkaYgylQ7cQbYGNI+oRk9zWxB8BJWeNM4ID
+        cdcCab9tq7x1NCK2aWnhVgKfvB/f4m9c10QXU4L/rtRGtdEQ5JyYqBV5Ap50rA2r
+        LQUy2QKBgQCo7aeUyRZZwYbrkKYR72fOj6+x5Ev73bk4Roj+6OyXgTjzgGOSu5m2
+        h9YOyIHDYG/km5tFnRkmrtyO/I0rgf5J7oH33lHOHpwIYtPXbZCK07k8IXX+BI9S
+        JB9rysXUxH9BM0SjarKMZv1CmC/4wRVi6mHMwsrU4Tpye+sNQbm5vA==
+        -----END RSA PRIVATE KEY-----
+      publickey: |-
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwNEIiHQpJklkxsGOG5KF
+        QthXOW3ZANlWdHupVW+5k10eIp1EbFariLL9rHQcMIXaCpMc71WML3+mQWkfioA/
+        CiJgsyd5HdzHsy1PeulcEMfntUxM4PVDdCNt3UtBcWavjyIlPh/lgpsMxBaJWU5G
+        y3zo7IJK8E820SOyjgXnqgl1THJSZ2fUHLTTmBmeq8B3ZUYeH9VrOZYYqt0EhS28
+        EYBQGYmGGGD02YarGyizoGrn15/JdiZ5M/QFlddOKGT6YCD6pilGbRi2Y/SFPkba
+        Sj1JBN8lnQlHRLHt5kZ7hCln78g6++2K15ZhUorTlZoqsqSqmS/7yojRhmd7qqlj
+        ZwIDAQAB
+        -----END PUBLIC KEY-----
+      servercert: |-
+        -----BEGIN CERTIFICATE-----
+        MIIDCjCCAfKgAwIBAgIBAjANBgkqhkiG9w0BAQsFADA/MT0wOwYDVQQDDDRNeVNR
+        TF9TZXJ2ZXJfOC4wLjE5LTEwX0F1dG9fR2VuZXJhdGVkX0NBX0NlcnRpZmljYXRl
+        MB4XDTIwMDgxNDIyMTA0OFoXDTMwMDgxMjIyMTA0OFowQzFBMD8GA1UEAww4TXlT
+        UUxfU2VydmVyXzguMC4xOS0xMF9BdXRvX0dlbmVyYXRlZF9TZXJ2ZXJfQ2VydGlm
+        aWNhdGUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDLfwSglcE55sf3
+        P5iHBghcfW/XZ1Z2l9A6A1UWM7U25qhgD+pkWY4IeUh4q8CIKzg3feZaNIBovj0Z
+        CxIZiVhza13wFAN5h87HpvQKUCumDYkFRZd1KOt9DpXY2MBVgOJZ4+OApuRVDuLx
+        sbGIxoYuk9G/Z48Fmw5Sk7znGIsRvYPnpVFo0zRHS3py2eOTp8T+6HKcV3VYzZdh
+        Jhrv39QAr1VxiB6IFBmM2ZJ+JG4mjDomspgxDEJjAH4VAllKJRPaqTp5jx/q1XGl
+        Uaus+aQjaFuGen6wVX3FIjoWz3Go6WZ+XbyIyWRysJhOZtZwL2whYdX2hCv2eHu0
+        IGNCCEP7AgMBAAGjDTALMAkGA1UdEwQCMAAwDQYJKoZIhvcNAQELBQADggEBAHj0
+        PkIunf2ZVQgAR1mdm8EHdCihFB7tdrFYCg4F65KzLy69gtMaRL6fN6BXtw/+j4bJ
+        ycChhlIRZ/EITmAPQAwQwE9QGUqtd9Boir1zDDI12S0ZjV1d6mmxjLpo9zan6Pie
+        hHbNUo1yG27atXQSh6o0VHgcrPnLMoKGtP8gnsdStRqEn11K3qtYf0Mf/0V/hiZ0
+        ubfnQPc8Ow2tFFa+g9cC9Sb/Fm948Qq35HUOD3PwKqtlQgXw8HQTNN+KHfWvX3RJ
+        5lqhXoE8i82s6mH6+i8RA5qDGQpEu9N/XL5rFsM9G9Tobm265pQ34gqF0tQIZu5d
+        CYHmfFgvHeiOI8oSO58=
+        -----END CERTIFICATE-----
+      serverkey: |-
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEpAIBAAKCAQEAy38EoJXBOebH9z+YhwYIXH1v12dWdpfQOgNVFjO1NuaoYA/q
+        ZFmOCHlIeKvAiCs4N33mWjSAaL49GQsSGYlYc2td8BQDeYfOx6b0ClArpg2JBUWX
+        dSjrfQ6V2NjAVYDiWePjgKbkVQ7i8bGxiMaGLpPRv2ePBZsOUpO85xiLEb2D56VR
+        aNM0R0t6ctnjk6fE/uhynFd1WM2XYSYa79/UAK9VcYgeiBQZjNmSfiRuJow6JrKY
+        MQxCYwB+FQJZSiUT2qk6eY8f6tVxpVGrrPmkI2hbhnp+sFV9xSI6Fs9xqOlmfl28
+        iMlkcrCYTmbWcC9sIWHV9oQr9nh7tCBjQghD+wIDAQABAoIBAQCldyWjEcHpO98z
+        CxISEHSyCAjt5IforG7TDSydffQGrS0R1z8m067q8vtbq4RE9Kekb4njpTcYdD+n
+        4lmYTBaQ2yep9AwTQLuBmh5rWF71iaH1mG2cBWbd7AMqLKzPmZnzr5qoXIvjIdSk
+        5HDQH2Sx8N4nPaSM0VSnDpwWaN2D0NuGdhTNWf1W9MlHPwUElF0eThuLwMGzthkr
+        RXlzKD3h7MPegoYArIebIJMAKafl50STiayKO7wiXMZmGCXaAx6Spc08fizMtpFk
+        PpBjB8DpIqA9EMAApGUF7oKIhWXYGxm1QMQM4Hd81nbK/xRoo1l15UO4KFmCptdT
+        aWYaM0tZAoGBAOUcaXDAM8qZoBqhcZMfyudfJqWfoXROua+G4QOv8pYKcDs/bAT5
+        +0WF+GwyUsPHV3kh18peXz4uoNY1X1Omd+aP9U4D2Ioisd5r129rBoL05m1AFxVG
+        uvfn+R5wszFi0pTbUj1O1pVgyjH36NwKtwITKl+raK2wLdgL0jObWIaPAoGBAONh
+        A8LH011bPe2328DB6VGx5o/FQcsUI2YtON7stqPAvwE82EUQWs4P3LIX+J2yP0IM
+        4/0lxOoeUac8OyyjLU+fTKIxhzYk+XBTDKJQyxua0hLwxYhzAMv2U33MkksElQfB
+        ycbias+VHdNAdPCaNbNkYeSOswIMULYuMHEwakHVAoGAYBTWMy6niaN7fS+PTb/b
+        e8RvlK2pK/mH7ZCG9ODovvuJrY8fYcbkFXflgppoEyqaCHak5H1HO/CaCrs/SvlY
+        9xwQJ7N9MBD0vu5C3rrndCv4JoDmLUoIRsbFtnpU67Uh0sNXbdaOLv70TJhG02C6
+        9ufKsWxU7eIgl6X9dR8EtQkCgYAH2C/+B1DWdrBjRCWTt9zp0Z5ntWF4tSAnhUXi
+        Av6mFZ9BVq0LbO4FD+0IQ+Vy41RlXfZ7pFLv1M3yXBSajKKijZdiPR0yFAJ7CpJ0
+        Ax+Ouz+mIaJe+8C6SKxGuckOR4EwvFHOx77xnG5j/GRMbLWPk9YAwZ+RYYVjU6Ke
+        NRJlZQKBgQDYXLO7r4pekXaa644gUBIH8FE05UhLshxU5DE6u3RLgXo2XV61uipy
+        od/2VYvBLlFD53ORjBmubUUZ+kLIG4Z5LUEhHt2lJSGwrtnu59WfbYVGqp34/bNA
+        o7iz/RsQwF4/4RPJEYZsWakcx6Q07rLEj3kffs0NR0XKuFgLjneoKg==
+        -----END RSA PRIVATE KEY-----
+
+
+## Configure PodDisruptionBudget
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+#
+podDisruptionBudget:
+  enabled: false
+  # minAvailable: 1
+  maxUnavailable: 1
+
+## Set the percona kubernetes service headless (no load-balancing)
+## ref: https://kubernetes.io/docs/concepts/services-networking/service/#headless-services
+service:
+  percona:
+    headless: true
+
+serviceAccount:
+  ## Set the serviceAccountName.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  # serviceAccountName:
+  automountToken: true
+
+## Set the securityContext parameters.
+## 1001 is the UID of mysql user.
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+securityContext:
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001

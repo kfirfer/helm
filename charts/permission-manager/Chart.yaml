@@ -1,0 +1,9 @@
+apiVersion: v1
+appVersion: "v1.7.1-rc1"
+description: A Helm chart for Kube-hunter
+name: permission-manager
+version: 1.0.6
+keywords:
+- kubernetes
+- security
+icon: https://3.bp.blogspot.com/-9_-b0nEDB94/XDeXlBAancI/AAAAAAAAEo0/T7V1-SK_MWcXgNDxbrk1uJTaPTDZPATyACLcBGAs/s1600/helm.png

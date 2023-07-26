@@ -1,0 +1,107 @@
+# Default values for pmm-server.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: percona/pmm-server
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "2.38.1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  automountServiceAccountToken: true
+
+env:
+  DISABLE_UPDATES: "true"
+  SERVER_USER: "admin"
+  METRICS_RESOLUTION: "5s"
+  DATA_RETENTION: "192h"
+
+secret:
+  SERVER_PASSWORD: "a123123"
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+service:
+  type: ClusterIP
+  port: 4431
+
+ingress:
+  enabled: false
+#  ingressClassName: nginx
+  annotations: {}
+  hosts:
+    - host: www.example.com
+      paths: ["/"]
+  tls: []
+#    - hosts:
+#        - "www.example.com"
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#  requests:
+#    cpu: 100m
+#    memory: 1Gi
+#  limits:
+#    cpu: 3
+#    memory: 4Gi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+persistence:
+  enabled: true
+  labels:
+    # Add default labels for the volumeClaimTemplate fo the StatefulSet
+    enabled: false
+  subPath:
+  annotations: {}
+
+volumeClaimTemplate:
+  accessModes: [ "ReadWriteOnce" ]
+  #  storageClassName: "local-storage"
+  resources:
+    requests:
+      storage: 5Gi
+
+podManagementPolicy: "Parallel"
+
+updateStrategy: RollingUpdate

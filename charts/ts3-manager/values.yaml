@@ -1,0 +1,118 @@
+# Default values for ts3-manager.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: joni1802/ts3-manager
+  pullPolicy: IfNotPresent
+  tag: v2.2.0
+
+imagePullSecret:
+  enabled: false
+  secret: base64secret
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Override current command
+#command: ["/bin/bash", "-c", "sleep 10"]
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: { }
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+  ## opt in/out of automounting API credentials into container
+  ## https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  automountToken: true
+
+strategy:
+  rollingUpdate:
+    maxSurge: 50%
+    maxUnavailable: 50%
+
+forceRedeploy: false
+
+env: {}
+
+secret: {}
+
+service:
+  type: ClusterIP
+  port: 8080
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 4
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  periodSeconds: 3
+  timeoutSeconds: 2
+  successThreshold: 1
+  failureThreshold: 4
+
+resources: {}
+#  requests:
+#    cpu: 10m
+#    memory: 300Mi
+#  limits:
+#    cpu: 4
+#    memory: 1Gi
+
+terminationGracePeriodSeconds: 30
+
+ingress:
+  enabled: false
+  annotations: { }
+  hostname: domain.local
+#  ingressClassName:
+  ## extraHosts:
+  ## - name: domain.local
+  ##   path: /
+  tls: [ ]
+#    - hosts:
+#      - "domain.local"
+
+nodeSelector: {}
+
+lifecycle: {}
+#  preStop:
+#    exec:
+#      command: [ "/bin/sh", "-c", "sleep 5" ]
+
+tolerations: [ ]
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  readOnlyRootFilesystem: false
+  runAsNonRoot: false
+  runAsUser: 0
+
+# Hard means that by default pods will only be scheduled if there are enough nodes for them
+# and that they will never end up on the same node. Setting this to soft will do this "best effort"
+antiAffinity: "soft"
+
+# Only used if you choose soft
+weight: 1
+
+antiAffinityTopologyKey: "kubernetes.io/hostname"
+
+# Annotations to be added to pods
+podAnnotations: {}
+
+
+
+

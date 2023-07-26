@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "haproxy.fullname" . }}-config
+  labels:
+    {{- include "haproxy.labels" . | nindent 4 }}
+data:
+  haproxy.cfg: |
+    global
+      log 127.0.0.1 local0 notice
+      maxconn {{ .Values.haConfig.maxconn }}
+      user root
+      group root
+
+    defaults
+      log global
+      retries 2
+      maxconn {{ .Values.haConfig.maxconn }}
+      timeout connect 10s
+      timeout server 10800s
+      timeout client 10800s
+
+    frontend mysql-cluster-front
+      bind 0.0.0.0:3306
+      mode tcp
+      option tcplog
+      default_backend mysql-cluster-back
+
+    resolvers mydns
+      nameserver dns1 {{ .Values.haConfig.dnsServer }}
+      parse-resolv-conf
+      resolve_retries       3
+      timeout resolve       2s
+      timeout retry         2s
+      hold other           30s
+      hold refused         30s
+      hold nx              30s
+      hold timeout         30s
+      hold valid           10s
+      hold obsolete        30s
+      accepted_payload_size 8192 # allow larger DNS payloads
+
+    backend mysql-cluster-back
+      mode tcp
+      option tcplog
+      option httpchk GET / HTTP/1.1
+      balance roundrobin
+      {{ .Values.haConfig.healthcheck }}
+      {{- $namespace := .Release.Namespace }}
+      {{ if .Values.haConfig.namespace }}
+      {{- $namespace := .Values.haConfig.namespace }}
+      {{ end }}
+      {{- $clusterDomain := .Values.haConfig.clusterDomain }}
+      {{- $mysqlPort := .Values.haConfig.mysqlPort }}
+      {{- $service := .Values.haConfig.service }}
+      {{- range $val := .Values.haConfig.mysqlServers }}
+      server {{ $val.name }} {{ $val.host }}.{{ $service }}.{{ $namespace }}.svc.{{$clusterDomain}}:{{ $mysqlPort }} check resolvers mydns resolve-prefer ipv4 {{- if $val.backup }} backup{{- end }}
+      {{- end }}
+
+    listen 0.0.0.0:8899
+      bind 0.0.0.0:8899
+      mode http
+      stats enable
+      stats uri /
+      stats realm Strictly\ Private
+      stats auth {{ .Values.haConfig.stats.user }}:{{ .Values.haConfig.stats.password }}
+      stats admin if TRUE
+
+    {{- if .Values.metrics.enabled }}
+    frontend metrics
+      mode http
+      bind *:{{ .Values.metrics.port }}
+      #option http-use-htx
+      http-request use-service prometheus-exporter if { path {{ .Values.metrics.scrapePath }} }
+    {{- end }}

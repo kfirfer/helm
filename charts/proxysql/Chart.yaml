@@ -1,0 +1,16 @@
+name: proxysql
+version: 0.0.2
+description: Chart for ProxySQL
+keywords:
+- mysql
+- database
+- proxysql
+- cluster
+home: http://www.proxysql.com/
+sources:
+- https://github.com/sysown/proxysql
+maintainers:
+- name: Jeremy Xu
+  email: jeremyxu2010@gmail.com
+apiVersion: v2
+appVersion: 2.0.15

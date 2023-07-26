@@ -1,0 +1,256 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "fluentd-elasticsearch.fullname" . }}
+  labels:
+    {{- include "fluentd-elasticsearch.labels" . | nindent 4 }}
+    addonmanager.kubernetes.io/mode: Reconcile
+{{- if .Values.annotations }}
+  annotations:
+{{ toYaml .Values.annotations | indent 4 }}
+{{- end }}
+spec:
+  updateStrategy:
+{{ toYaml .Values.updateStrategy | indent 4 }}
+  selector:
+    matchLabels:
+      {{- include "fluentd-elasticsearch.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fluentd-elasticsearch.selectorLabels" . | nindent 8 }}
+        {{- with .Values.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmaps.yaml") . | sha256sum }}
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+      serviceAccountName: {{ include "fluentd-elasticsearch.fullname" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+{{- if .Values.securityContext }}
+      securityContext:
+{{ toYaml .Values.securityContext | indent 8 }}
+{{- end }}
+      containers:
+      - name: {{ include "fluentd-elasticsearch.fullname" . }}
+        image:  "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        env:
+        - name: FLUENTD_ARGS
+          value: {{ .Values.fluentdArgs | quote }}
+        {{- if .Values.elasticsearch.setOutputHostEnvVar }}
+        - name: OUTPUT_HOSTS
+          value: "{{- join "," .Values.elasticsearch.hosts }}"
+        {{- end }}
+        - name: OUTPUT_PATH
+          value: {{ .Values.elasticsearch.path | quote }}
+{{- if .Values.elasticsearch.auth.enabled }}
+{{- if .Values.elasticsearch.auth.user }}
+        - name: OUTPUT_USER
+          value: {{ .Values.elasticsearch.auth.user | quote }}
+{{- end }}
+{{- if .Values.elasticsearch.auth.existingSecret.name }}
+        - name: OUTPUT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.elasticsearch.auth.existingSecret.name }}
+              key: {{ .Values.elasticsearch.auth.existingSecret.key }}
+{{- else if .Values.elasticsearch.auth.password }}
+        - name: OUTPUT_PASSWORD
+          value: {{ .Values.elasticsearch.auth.password | quote }}
+{{- end }}
+{{- end }}
+        - name: LOGSTASH_FORMAT
+          value: {{ .Values.elasticsearch.logstash.enabled | quote }}
+        - name: LOGSTASH_DATEFORMAT
+          value: {{ .Values.elasticsearch.logstash.dateformat | quote }}
+        - name: LOGSTASH_PREFIX
+          value: {{ .Values.elasticsearch.logstash.prefix | quote }}
+        - name: LOGSTASH_PREFIX_SEPARATOR
+          value: {{ .Values.elasticsearch.logstash.prefixSeparator | quote }}
+        - name: INDEX_NAME
+          value: {{ .Values.elasticsearch.indexName | quote }}
+        - name: INDEX_DATE_PATTERN
+          value: {{ .Values.elasticsearch.indexDatePattern | quote }}
+{{- if .Values.elasticsearch.ilm.enabled }}
+        - name: ENABLE_ILM
+          value: {{ .Values.elasticsearch.ilm.enabled | quote }}
+        - name: ILM_POLICY_ID
+          value: {{ .Values.elasticsearch.ilm.policy_id | quote }}
+        - name: ILM_POLICY
+          value: '{"policy":{{ toJson .Values.elasticsearch.ilm.policy }}}'
+        - name: ILM_POLICIES
+          value: {{ toJson .Values.elasticsearch.ilm.policies | quote }}
+        - name: ILM_POLICY_OVERWRITE
+          value: {{ .Values.elasticsearch.ilm.policy_overwrite | quote }}
+{{- end }}
+{{- if or .Values.elasticsearch.template.enabled .Values.elasticsearch.ilm.enabled }}
+        - name: TEMPLATE_NAME
+          value: {{ .Values.elasticsearch.template.name | quote }}
+        - name: TEMPLATE_FILE
+          value: "/etc/fluent/config.d/{{ .Values.elasticsearch.template.file }}"
+        - name: TEMPLATE_OVERWRITE
+          value: {{ .Values.elasticsearch.template.overwrite | quote }}
+        - name: USE_LEGACY_TEMPLATE
+          value: {{ .Values.elasticsearch.template.useLegacy | quote }}
+        - name: ROLLOVER_INDEX
+          value: {{ .Values.elasticsearch.template.rolloverIndex | quote }}
+{{- end }}
+        - name: OUTPUT_SCHEME
+          value: {{ .Values.elasticsearch.scheme | quote }}
+        - name: OUTPUT_TYPE
+          value: {{ .Values.elasticsearch.outputType | quote }}
+        - name: OUTPUT_SSL_VERIFY
+          value: {{ .Values.elasticsearch.sslVerify | quote }}
+        - name: OUTPUT_SSL_VERSION
+          value: {{ .Values.elasticsearch.sslVersion | quote }}
+        - name: OUTPUT_TYPE_NAME
+          value: {{ .Values.elasticsearch.typeName | quote }}
+        - name: OUTPUT_BUFFER_CHUNK_LIMIT
+          value: {{ .Values.elasticsearch.buffer.chunkLimitSize | quote }}
+        - name: OUTPUT_BUFFER_TOTAL_LIMIT_SIZE
+          value: {{ .Values.elasticsearch.buffer.totalLimitSize | quote }}
+          {{- if .Values.elasticsearch.buffer.chunkKeys }}
+        - name: OUTPUT_BUFFER_CHUNK_KEYS
+          value: {{ .Values.elasticsearch.buffer.chunkKeys | quote }}
+          {{- end }}
+        - name: OUTPUT_BUFFER_TYPE
+          value: {{ .Values.elasticsearch.buffer.type | quote }}
+        - name: OUTPUT_BUFFER_PATH
+          value: {{ .Values.elasticsearch.buffer.path | quote }}
+        - name: OUTPUT_BUFFER_FLUSH_MODE
+          value: {{ .Values.elasticsearch.buffer.flushMode | quote }}
+        - name: OUTPUT_BUFFER_RETRY_TYPE
+          value: {{ .Values.elasticsearch.buffer.retryType | quote }}
+        - name: OUTPUT_BUFFER_FLUSH_THREAD_TYPE
+          value: {{ .Values.elasticsearch.buffer.flushThreadCount | quote }}
+        - name: OUTPUT_BUFFER_FLUSH_INTERVAL
+          value: {{ .Values.elasticsearch.buffer.flushInterval | quote }}
+        - name: OUTPUT_BUFFER_RETRY_FOREVER
+          value: {{ .Values.elasticsearch.buffer.retryForever | quote }}
+        - name: OUTPUT_BUFFER_RETRY_MAX_INTERVAL
+          value: {{ .Values.elasticsearch.buffer.retryMaxInterval | quote }}
+        - name: OUTPUT_BUFFER_OVERFLOW_ACTION
+          value: {{ .Values.elasticsearch.buffer.overflowAction | quote }}
+        {{- if .Values.elasticsearch.buffer.timekey }}
+        - name: OUTPUT_BUFFER_TIME_KEY
+          value: {{ .Values.elasticsearch.buffer.timekey | quote }}
+        {{- end }}
+        - name: OUTPUT_LOG_LEVEL
+          value: {{ .Values.elasticsearch.logLevel | quote }}
+        - name: OUTPUT_INCLUDE_TAG_KEY
+          value: {{ .Values.elasticsearch.includeTagKey | quote }}
+        - name: OUTPUT_LOG_400_REASON
+          value: {{ .Values.elasticsearch.log400Reason | quote }}
+        - name: OUTPUT_RECONNECT_ON_ERROR
+          value: {{ .Values.elasticsearch.reconnectOnError | quote }}
+        - name: OUTPUT_RELOAD_ON_FAILURE
+          value: {{ .Values.elasticsearch.reloadOnFailure | quote }}
+        - name: OUTPUT_RELOAD_CONNECTIONS
+          value: {{ .Values.elasticsearch.reloadConnections | quote }}
+        - name: OUTPUT_REQUEST_TIMEOUT
+          value: {{ .Values.elasticsearch.requestTimeout | quote }}
+{{- if .Values.elasticsearch.suppressTypeName }}
+        - name: OUTPUT_SUPPRESS_TYPE_NAME
+          value: {{ .Values.elasticsearch.suppressTypeName | quote }}
+{{- end }}
+        - name: INCLUDE_TIMESTAMP
+          value: {{ .Values.elasticsearch.includeTimestamp | quote }}
+        {{- if .Values.env }}
+        {{- range $key, $value := .Values.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.secret }}
+        {{- range $key, $value := .Values.secret }}
+        - name: {{ .name }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ $value.secret_name }}
+              key: {{ $value.secret_key | quote }}
+        {{- end }}
+        {{- end }}
+        - name: K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - name: varlog
+          mountPath: {{ .Values.hostLogDir.varLog }}
+        - name: varlibdockercontainers
+          mountPath: {{ .Values.hostLogDir.dockerContainers }}
+          readOnly: true
+        - name: libsystemddir
+          mountPath: {{ .Values.hostLogDir.libSystemdDir }}
+          readOnly: true
+        - name: config-volume
+          mountPath: {{ .Values.fluentConfDir }}
+{{- if .Values.extraVolumeMounts }}
+{{ toYaml .Values.extraVolumeMounts | indent 8 }}
+{{- end }}
+      {{- if .Values.livenessProbe.enabled }}  #pointing to fluentd Dockerfile
+        livenessProbe:
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+{{ toYaml .Values.livenessProbe.kind | indent 10 }}
+{{- end }}
+        ports:
+{{- range $port := .Values.service.ports }}
+          - name: {{ $port.name }}
+            containerPort: {{ $port.port }}
+{{- if $port.protocol }}
+            protocol: {{ $port.protocol }}
+{{- end }}
+{{- end }}
+{{- if .Values.extraContainers }}
+{{ toYaml .Values.extraContainers | indent 6 }}
+{{- end }}
+{{- if .Values.extraInitContainers }}
+      initContainers:
+{{ toYaml .Values.extraInitContainers | indent 6 }}
+{{- end }}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: {{ .Values.hostLogDir.varLog }}
+      - name: varlibdockercontainers
+        hostPath:
+          path: {{ .Values.hostLogDir.dockerContainers }}
+      # It is needed to copy systemd library to decompress journals
+      - name: libsystemddir
+        hostPath:
+          path: {{ .Values.hostLogDir.libSystemdDir }}
+      - name: config-volume
+        configMap:
+          name: {{ include "fluentd-elasticsearch.fullname" . }}
+{{- if .Values.extraVolumes }}
+{{ toYaml .Values.extraVolumes | indent 6 }}
+{{- end }}
+{{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 6 }}
+{{- end }}

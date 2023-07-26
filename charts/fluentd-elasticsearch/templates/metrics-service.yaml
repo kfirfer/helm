@@ -1,0 +1,17 @@
+{{- if or (.Values.serviceMonitor.enabled) (.Values.serviceMetric.enabled) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fluentd-elasticsearch.metricsServiceName" . }}
+  labels:
+    {{- include "fluentd-elasticsearch.labels" . | nindent 4 }}
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  type: {{ .Values.serviceMonitor.type }}
+  ports:
+    - name: metrics
+      port: {{ .Values.serviceMonitor.port }}
+      targetPort: {{ .Values.serviceMonitor.port }}
+  selector:
+    {{- include "fluentd-elasticsearch.selectorLabels" . | nindent 4 }}
+{{- end }}

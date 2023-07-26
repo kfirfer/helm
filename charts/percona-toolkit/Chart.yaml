@@ -1,0 +1,13 @@
+apiVersion: v2
+name: percona-toolkit
+description: A Helm chart for Kubernetes
+icon: https://www.percona.com/sites/all/themes/percona2015/logo.png
+type: application
+version: 0.0.5
+appVersion: 3.2.1
+home: https://github.com/kfirfer/helm/tree/master/charts/percona-toolkit
+maintainers:
+  - email: kfirfer@gmail.com
+    name: kfir
+annotations:
+  category: Database

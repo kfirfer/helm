@@ -1,0 +1,17 @@
+{{- if .Values.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ template "fluentd-elasticsearch.fullname" . }}
+  labels:
+    {{- include "fluentd-elasticsearch.labels" . | nindent 4 }}
+    addonmanager.kubernetes.io/mode: Reconcile
+    {{- if .Values.prometheusRule.labels }}
+    {{- toYaml .Values.prometheusRule.labels | nindent 4 }}
+    {{- end }}
+  namespace: {{ .Values.prometheusRule.prometheusNamespace }}
+spec:
+  groups:
+  - name: fluentd
+    rules: {{- tpl (toYaml .Values.prometheusRule.rules) $ | nindent 4 }}
+{{- end }}

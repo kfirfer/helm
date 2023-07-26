@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: permission-manager
+  labels:
+    app: permission-manager
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: permission-manager
+  template:
+    metadata:
+      labels:
+        app: permission-manager
+      annotations:
+        {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+    spec:
+      securityContext:
+{{ toYaml .Values.podSecurityContext | indent 8 }}
+      serviceAccountName: permission-manager
+      containers:
+        - name: permission-manager
+          securityContext:
+{{ toYaml .Values.securityContext | indent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          envFrom:
+            - secretRef:
+                name: permission-manager
+            {{ if .Values.existingSecret }}
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+            {{ end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+

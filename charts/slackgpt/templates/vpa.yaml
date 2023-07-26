@@ -1,0 +1,33 @@
+{{- if and (.Capabilities.APIVersions.Has "autoscaling.k8s.io/v1") (.Values.verticalPodAutoscaler.enabled) }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ include "slackgpt.fullname" . }}
+  labels:
+{{- include "slackgpt.labels" . | nindent 4 }}
+spec:
+  resourcePolicy:
+    containerPolicies:
+    - containerName: {{ .Values.verticalPodAutoscaler.containerName | default .Chart.Name | quote }}
+      {{- if .Values.verticalPodAutoscaler.controlledResources }}
+      controlledResources: {{ .Values.verticalPodAutoscaler.controlledResources }}
+      {{- end }}
+      {{- if .Values.verticalPodAutoscaler.maxAllowed }}
+      maxAllowed:
+        {{- toYaml .Values.verticalPodAutoscaler.maxAllowed | nindent 8 }}
+      {{- end }}
+      {{- if .Values.verticalPodAutoscaler.minAllowed }}
+      minAllowed:
+        {{- toYaml .Values.verticalPodAutoscaler.minAllowed | nindent 8 }}
+      {{- end }}
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "slackgpt.fullname" . }}
+  {{- if .Values.verticalPodAutoscaler.updatePolicy }}
+  updatePolicy:
+    {{- if .Values.verticalPodAutoscaler.updatePolicy.updateMode }}
+    updateMode: {{ .Values.verticalPodAutoscaler.updatePolicy.updateMode  }}
+    {{- end }}
+  {{- end }}
+{{- end }}

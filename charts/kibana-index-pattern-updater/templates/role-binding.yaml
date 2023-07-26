@@ -1,0 +1,17 @@
+{{- if .Values.rbac.enabled }}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "kibana-index-pattern-updater.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "kibana-index-pattern-updater.labels" . | indent 4 }}
+subjects:
+- kind: ServiceAccount
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "kibana-index-pattern-updater.serviceAccountName" . }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "kibana-index-pattern-updater.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

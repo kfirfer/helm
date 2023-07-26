@@ -1,0 +1,113 @@
+{{- $fullname := (include "teamspeak.fullname" .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "teamspeak.fullname" . }}
+  labels:
+    {{- include "teamspeak.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "teamspeak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+      {{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+      {{- end }}
+      labels:
+        {{- include "teamspeak.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "teamspeak.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ .Values.image.repository }}:{{ include "teamspeak.imageTag" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.command }}
+          command:
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "teamspeak.fullname" . }}
+          ports:
+          {{- if (contains "raw" .Values.config.TS3SERVER_QUERY_PROTOCOLS) }}
+            - name: queryraw
+              containerPort: 10011
+              protocol: TCP
+          {{- end }}
+          {{- if (contains "ssh" .Values.config.TS3SERVER_QUERY_PROTOCOLS) }}
+            - name: queryssh
+              containerPort: 10022
+              protocol: TCP
+          {{- end }}
+            - name: file
+              containerPort: 30033
+              protocol: TCP
+          {{- range $key, $val := .Values.service.voice.ports }}
+            - name: voice{{ $key }}
+              protocol: UDP
+              containerPort: {{ $val }}
+          {{- end }}
+          {{- if .Values.config.TS3SERVER_QUERY_PROTOCOLS }}
+          livenessProbe:
+            tcpSocket:
+            {{- if (contains "raw" .Values.config.TS3SERVER_QUERY_PROTOCOLS) }}
+              port: queryraw
+            {{- else if (contains "ssh" .Values.config.TS3SERVER_QUERY_PROTOCOLS) }}
+              port: queryssh
+            {{- end }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          readinessProbe:
+            tcpSocket:
+            {{- if (contains "raw" .Values.config.TS3SERVER_QUERY_PROTOCOLS) }}
+              port: queryraw
+            {{- else if (contains "ssh" .Values.config.TS3SERVER_QUERY_PROTOCOLS) }}
+              port: queryssh
+            {{- end }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- with .Values.storage }}
+          volumeMounts:
+            - name: {{ .data.name }}
+              mountPath: "/var/ts3server"
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.storage }}
+      volumes:
+        - name: {{ .data.name }}
+          persistentVolumeClaim:
+            claimName: {{ if .data.existingClaim -}}
+                         {{- .data.existingClaim -}}
+                       {{- else -}}
+                         {{- $fullname }}-{{ .data.name -}}
+                       {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
