@@ -1,0 +1,13 @@
+{{- if .Values.rbac.createClusterScoped }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "scripts.fullname" . }}
+rules:
+- resources:
+  - '*'
+  apiGroups:
+  - '*'
+  verbs:
+  - '*'
+{{- end }}

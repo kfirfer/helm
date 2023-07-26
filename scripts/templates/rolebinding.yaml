@@ -1,0 +1,14 @@
+{{- if .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "scripts.fullname" . }}
+roleRef:
+  name: {{ include "scripts.fullname" . }}
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- name: {{ include "scripts.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+  kind: ServiceAccount
+{{- end }}

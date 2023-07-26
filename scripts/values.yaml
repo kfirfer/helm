@@ -1,0 +1,159 @@
+# Default values for scripts.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  registry: docker.io
+  repository: kfirfer/scripts
+  pullPolicy: IfNotPresent
+  tag: ""
+
+# -- Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries).
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+# -- Override the Kubernetes version, which is used to evaluate certain manifests
+kubeVersionOverride: ""
+
+# Only support yaml files
+configFiles: {}
+#  somefile.yaml:
+#    users:
+#      - user: "auditservices"
+#        password: "verystrongpassword"
+
+secretFiles: {}
+#    key.json: |
+#      {}
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+  ## opt in/out of automounting API credentials into container
+  ## https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  automountToken: true
+
+strategy:
+  rollingUpdate:
+    maxSurge: 100%
+    maxUnavailable: 100%
+
+annotations:
+  sidecar.jaegertracing.io/inject: "false"
+
+jobAnnotations: {}
+
+command: ["/the_script.sh"]
+
+terminationGracePeriodSeconds: 0
+
+env: {}
+
+secret: {}
+
+rbac:
+  # -- Specifies whether RBAC resources should be created.
+  create: true
+  createClusterScoped: false
+
+# resources -- Specify resources on the container.
+## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+resources:
+  requests:
+    cpu: "10m"
+    memory: "10Mi"
+  limits:
+    cpu: "2000m"
+    memory: "2000Mi"
+
+# Annotations to add to the deployment's pod template. Optional.
+podAnnotations: {}
+
+# Additional pod labels for deployment's template. Optional
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+nodeSelector: {}
+
+lifecycle: {}
+#  preStop:
+#    exec:
+#      command: ["/bin/sh", "-c", "sleep 5"]
+
+tolerations: []
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  readOnlyRootFilesystem: false
+  runAsNonRoot: false
+  runAsUser: 0
+
+# Init containers to add to deployment's pod spec. At least one plugin provider image is required.
+# If the value is a string then it is evaluated as a template.
+initContainers:
+# - name: plugin-for-csi
+#   image: velero/velero-plugin-for-csi:v0.3.0
+#   imagePullPolicy: IfNotPresent
+#   volumeMounts:
+#     - mountPath: /target
+#       name: plugins
+# - name: plugin-for-aws
+#   image: velero/velero-plugin-for-aws:v1.5.0
+#   imagePullPolicy: IfNotPresent
+#   volumeMounts:
+#     - mountPath: /target
+#       name: plugins
+
+# Configure the dnsPolicy of deployment
+# See: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+dnsPolicy: ClusterFirst
+
+# Extra volumes for deployment. Optional.
+extraVolumes: []
+#  - name: plugins
+#    emptyDir: {}
+
+# Extra volumeMounts for deployment. Optional.
+extraVolumeMounts: []
+#     - mountPath: /target
+#       name: plugins
+
+# -- Additional containers to be added to the pod.
+# See https://github.com/lemonldap-ng-controller/lemonldap-ng-controller as example.
+extraContainers: []
+#  - name: my-sidecar
+#    image: nginx:latest
+#  - name: lemonldap-ng-controller
+#    image: lemonldapng/lemonldap-ng-controller:0.2.0
+#    args:
+#      - /lemonldap-ng-controller
+#      - --alsologtostderr
+#      - --configmap=$(POD_NAMESPACE)/lemonldap-ng-configuration
+#    env:
+#      - name: POD_NAME
+#        valueFrom:
+#          fieldRef:
+#            fieldPath: metadata.name
+#      - name: POD_NAMESPACE
+#        valueFrom:
+#          fieldRef:
+#            fieldPath: metadata.namespace
+#    volumeMounts:
+#    - name: copy-portal-skins
+#      mountPath: /srv/var/lib/lemonldap-ng/portal/skins
+
+## @param extraDeploy Array of extra objects to deploy with the release (evaluated as a template)
+##
+extraDeploy: []
+
+
+
+
