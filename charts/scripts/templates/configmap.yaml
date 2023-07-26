@@ -1,0 +1,17 @@
+{{- if .Values.configFiles }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "scripts.fullname" . }}
+  labels:
+{{- include "scripts.labels" . | nindent 4 }}
+data:
+{{- range $path, $config := .Values.configFiles }}
+  {{ $path }}: |
+{{- if eq (typeOf $config) "string" }}
+{{- $config | nindent 4 }}
+{{- else }}
+{{- toYaml $config | nindent 4 }}
+{{- end }}
+{{- end -}}
+{{- end -}}

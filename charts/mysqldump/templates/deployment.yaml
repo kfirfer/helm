@@ -1,0 +1,63 @@
+{{- if .Values.persistence.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "mysqldump.fullname" . }}-dataaccess
+  labels:
+    app.kubernetes.io/name: {{ include "mysqldump.name" . }}-dataaccess
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: {{ template "mysqldump.fullname" . }}-dataaccess
+  template:
+    metadata:
+      labels:
+        app: {{ template "mysqldump.fullname" . }}-dataaccess
+        version: "{{ .Values.image.tag }}"
+      {{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.imagePullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+      {{- end }}
+      containers:
+        - name: mysql-client
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          command:
+{{ toYaml .Values.dataaccess.command | indent 10 }}
+          volumeMounts:
+            - mountPath: "/backup"
+              name: task-pv-storage
+      volumes:
+        - name: task-pv-storage
+          persistentVolumeClaim:
+            {{- if not .Values.persistentVolumeClaim }}
+            claimName: {{ template "mysqldump.fullname" . }}
+            {{- else }}
+            claimName: {{ .Values.persistentVolumeClaim }}
+            {{- end }}
+{{- end }}

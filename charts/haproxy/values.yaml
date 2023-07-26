@@ -1,0 +1,133 @@
+replicaCount: 3
+
+image:
+  repository: haproxy
+  pullPolicy: IfNotPresent
+  tag: 2.6.14-alpine3.17
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Annotations to be added to pods
+podAnnotations: {}
+
+# Annotations to be added to deployment
+annotations: {}
+
+ingress:
+  enabled: false
+  #  ingressClassName: nginx
+  annotations: {}
+  path: /
+  hosts:
+    - "haproxy.example.com"
+  tls: []
+#    - hosts:
+#        - "haproxy.example.com"
+#      secretName: secret-tls
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  periodSeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 3
+  timeoutSeconds: 2
+  successThreshold: 1
+  failureThreshold: 2
+
+strategy:
+  rollingUpdate:
+    maxSurge: 50%
+    maxUnavailable: 50%
+
+lifecycle:
+  preStop:
+    exec:
+      command: ["/bin/sh", "-c", "sleep 5"]
+
+service:
+  type: ClusterIP
+  port: 3306
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+  ## opt in/out of automounting API credentials into container
+  ## https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  automountToken: true
+
+terminationGracePeriodSeconds: 5
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+# Hard means that by default pods will only be scheduled if there are enough nodes for them
+# and that they will never end up on the same node. Setting this to soft will do this "best effort"
+antiAffinity: "soft"
+
+# Only used if you choose soft
+weight: 1
+
+metrics:
+  enabled: false
+  # prometheus port & scrape path
+  port: 9101
+  portName: http-exporter-port
+  scrapePath: /metrics
+  serviceMonitor:
+    enabled: false
+    ## Specify a namespace if needed
+    ##
+    namespace:
+    ## fallback to the prometheus default unless specified
+    ##
+    interval:
+
+
+antiAffinityTopologyKey: "kubernetes.io/hostname"
+
+haConfig:
+  maxconn: 2000
+  # Default to the current namespace
+  namespace:
+  mysqlPort: 3306
+  clusterDomain: cluster.local
+  dnsServer: 10.96.0.10:53
+  service: percona-xtradb-cluster-pxc
+  healthcheck: "default-server port 8081 inter 5s downinter 5s rise 1 fall 2 slowstart 15s weight 1"
+  stats:
+    user: admin
+    password: admin
+  mysqlServers:
+    - name: mysql-0
+      host: percona-xtradb-cluster-pxc-0
+      backup: false
+    - name: mysql-1
+      host: percona-xtradb-cluster-pxc-1
+      backup: true
+    - name: mysql-2
+      host: percona-xtradb-cluster-pxc-2
+      backup: true

@@ -1,0 +1,78 @@
+# Default values for onlyoffice.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: onlyoffice/documentserver
+  tag: 7.4.0.1
+  pullPolicy: IfNotPresent
+
+strategy: RollingUpdate
+
+terminationGracePeriodSeconds: 10
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+  paths: ["/"]
+#  ingressClassName: nginx
+  hosts:
+    - "www.example.com"
+  tls:
+    - hosts:
+        - "www.example.coml"
+
+podSecurityPolicy:
+  create: true
+
+securitycontext: {}
+#  allowPrivilegeEscalation: false
+#  capabilities:
+#    add:
+#      - MKNOD
+
+
+secretKey: someverysecurepassword
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 120
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 5
+  scheme: HTTP
+  path: /healthcheck
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  timeoutSeconds: 2
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+  scheme: HTTP
+  path: /healthcheck
+
+
+serviceAccount:
+  automountToken: true
+
+podAnnotations: {}

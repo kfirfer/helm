@@ -1,0 +1,14 @@
+{{- if .Values.rbac.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "g-cronjob.fullname" . }}
+roleRef:
+  name: {{ include "g-cronjob.fullname" . }}
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- name: {{ include "g-cronjob.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+  kind: ServiceAccount
+{{- end }}

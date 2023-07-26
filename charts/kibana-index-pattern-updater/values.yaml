@@ -1,0 +1,88 @@
+# Default values for kibana-index-pattern-updater.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: kfirfer/kibana-index-pattern-updater
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "1.0.12"
+
+cronjob:
+  # At every 15th minute
+  schedule: "*/15 * * * *"
+  annotations: {}
+  labels: {}
+  concurrencyPolicy: "Forbid"
+  failedJobsHistoryLimit: "3"
+  successfulJobsHistoryLimit: "1"
+  jobRestartPolicy: Never
+  #startingDeadlineSeconds: 30
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+securityContext:
+   capabilities:
+     drop:
+     - ALL
+   readOnlyRootFilesystem: true
+   runAsNonRoot: true
+   runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+rbac:
+  # Specifies whether RBAC should be enabled
+  enabled: true
+
+pod:
+  annotations: {}
+  labels: {}
+
+secret:
+  LOAD_INCLUSTER_CONFIG: "1"
+  LOAD_KUBECONFIG: "0"
+  KIBANA_HOST: http://kibana:5601
+  KIBANA_USERNAME: admin
+  KIBANA_PASSWORD: admin
+  ELASTICSEARCH_HOST: http://elasticsearch:5601
+  DOMAIN: example.com
+  LOGGER_LEVEL: info
+  LOG_TO_CONSOLE: "1"
+  JSON_LOG_CONSOLE: "1"
+  EXCLUDE_NAMESPACES: "kube-system,kube-public"
+  ES_VERSION: "7.16.2"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+
+

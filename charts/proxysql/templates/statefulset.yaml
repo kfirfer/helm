@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.numReplicas }}
+  serviceName: {{ template "fullname" . }}
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      terminationGracePeriodSeconds: {{.Values.terminationGracePeriodSeconds}}
+      restartPolicy: Always
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          name: proxysql
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: {{ .Values.mysql.port }}
+              name: proxysql-mysql
+            - containerPort: {{ .Values.proxysql.admin.port }}
+              name: proxysql-admin
+{{ if .Values.proxysql.monitorConfigChange }}
+          env:
+            - name: MONITOR_CONFIG_CHANGE
+              value: "{{ .Values.proxysql.monitorConfigChange }}"
+{{ end }}
+          readinessProbe:
+            initialDelaySeconds: 3
+            successThreshold: 1
+            failureThreshold: 2
+            timeoutSeconds: 3
+            periodSeconds: 3
+            tcpSocket:
+              port: {{ .Values.proxysql.admin.port }}
+          livenessProbe:
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 5
+            tcpSocket:
+              port: {{ .Values.proxysql.admin.port }}
+          {{- with .Values.lifecycle }}
+          lifecycle:
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /etc/proxysql.cnf
+              name: proxysql
+              subPath: proxysql.cnf
+          {{ if .Values.resources }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.antiAffinity }}
+      affinity:
+        {{- if eq .Values.antiAffinity "hard" }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - "{{ template "fullname" . }}"
+              topologyKey: {{ .Values.antiAffinityTopologyKey }}
+        {{- else if eq .Values.antiAffinity "soft" }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: {{ .Values.weight }}
+              podAffinityTerm:
+                topologyKey: {{ .Values.antiAffinityTopologyKey }}
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - "{{ template "fullname" . }}"
+      {{- end }}
+      {{- end }}
+      volumes:
+        - name: proxysql
+          configMap:
+            name: {{ template "fullname" . }}
+            defaultMode: 0777
+      {{ if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      {{ end }}

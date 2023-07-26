@@ -1,0 +1,13 @@
+apiVersion: v2
+name: ts3-manager
+description: A Helm chart for Kubernetes
+icon: https://1.bp.blogspot.com/-SS2TiFZPpIQ/UUdSeFkTAPI/AAAAAAAAAlE/Q9oqGZCLm7U/s1600/Java7.png
+type: application
+version: 0.0.2
+appVersion: v2.2.0
+home: https://github.com/kfirfer/ts3-manager
+maintainers:
+  - name: kfirfer
+    email: kfirfer@gmail.com
+annotations:
+  category: ApplicationServer

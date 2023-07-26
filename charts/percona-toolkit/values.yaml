@@ -1,0 +1,56 @@
+# Default values for percona-toolkit.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: perconalab/percona-toolkit
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "3.2.1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+command:
+  - /bin/sh
+  - "-c"
+  - |
+    while sleep 3600; do :; done
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  ## opt in/out of automounting API credentials into container
+  ## https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  automountToken: true
+
+podAnnotations: {}
+
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+terminationGracePeriodSeconds: 10

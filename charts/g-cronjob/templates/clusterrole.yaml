@@ -1,0 +1,13 @@
+{{- if .Values.rbac.createClusterScoped }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Namespace }}-{{ include "g-cronjob.fullname" . }}
+rules:
+- resources:
+  - '*'
+  apiGroups:
+  - '*'
+  verbs:
+  - '*'
+{{- end }}

@@ -1,0 +1,27 @@
+{{ $fullname := (include "teamspeak.fullname" .) -}}
+{{- $lables := (include "teamspeak.labels" .) }}
+{{- with .Values.storage.data }}
+{{ if and .enabled (not .existingClaim) -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  name: {{ $fullname }}-{{ .name }}
+  labels:
+    {{- $lables | nindent 4 }}
+spec:
+  resources:
+    requests:
+      storage: {{ .size }}
+  {{- with .accessModes }}
+  accessModes:
+  {{- range $mode := . }}
+    - {{ $mode }}
+  {{ end }}
+  {{- end }}
+  {{- with .class -}}
+  storageClassName: {{ . }}
+  {{- end }}
+status: {}
+{{- end }}
+{{- end }}

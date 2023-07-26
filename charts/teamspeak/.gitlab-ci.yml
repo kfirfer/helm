@@ -1,0 +1,3 @@
+include:
+  - project: 'cocainefarm/templates/ci'
+    file: '/helmchart.yaml'

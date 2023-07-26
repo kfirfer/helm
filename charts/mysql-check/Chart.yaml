@@ -1,0 +1,13 @@
+apiVersion: v2
+name: mysql-check
+description: A Helm chart for Kubernetes
+icon: https://www.mysql.com/common/logos/logo-mysql-170x115.png
+type: application
+version: 0.2.6
+appVersion: 0.0.2
+home: https://github.com/kfirfer/helm/tree/master/charts/mysql-check
+maintainers:
+  - email: kfirfer@gmail.com
+    name: kfir
+annotations:
+  category: Database

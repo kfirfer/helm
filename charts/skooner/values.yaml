@@ -1,0 +1,118 @@
+replicaCount: 1
+revisionHistoryLimit: 1
+
+image:
+  registry: ghcr.io/skooner-k8s/skooner
+  tag: stable
+  pullPolicy: Always
+
+nameOverride: ""
+fullnameOverride: ""
+# -- Override the Kubernetes version, which is used to evaluate certain manifests
+kubeVersionOverride: ""
+
+resources: {}
+
+# If true will create skooner-sa and associate with cluster-admin role. Secret can be used for auth page with:
+# kubectl describe secret skooner-sa-token-xxxxx
+createServiceAccount: true
+
+extraEnv: {}
+
+annotations: {}
+
+service:
+  httpPort: 4654
+
+ingress:
+  enabled: false
+  ingressClassName: nginx
+  ## Kubernetes Dashboard Ingress annotations
+  annotations: {}
+  hosts:
+    - host: www.example.com
+      paths: [ "/" ]
+  tls:
+    - hosts:
+        - "www.example.com"
+    # secretName: tlsSecret
+
+secondIngress:
+  enabled: false
+#  ingressClassName: nginx
+  ## Kubernetes Dashboard Ingress annotations
+  annotations: {}
+  hosts:
+    - host: www.example.com
+      paths: [ "/" ]
+  tls:
+    - hosts:
+        - "www.example.com"
+
+affinity: {}
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 20
+  periodSeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 6
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 4
+  successThreshold: 1
+  failureThreshold: 3
+
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 20
+  periodSeconds: 3
+  timeoutSeconds: 2
+  successThreshold: 1
+  failureThreshold: 3
+
+lifecycle: {}
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 3
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  annotations: {}
+  behavior: {}
+    # scaleDown:
+    #   stabilizationWindowSeconds: 300
+    #  policies:
+    #   - type: Pods
+    #     value: 1
+    #     periodSeconds: 180
+    # scaleUp:
+    #   stabilizationWindowSeconds: 300
+    #   policies:
+    #   - type: Pods
+  #     value: 2
+  #     periodSeconds: 60
+
+## Configure PodDisruptionBudget
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+#
+podDisruptionBudget:
+  # -- Labels to be added
+  labels: {}
+  # -- Annotations to be added
+  annotations: {}
+
+  # -- Deploy a Poddisruptionbudget
+  enabled: false
+  # minAvailable: 1
+  # maxUnavailable: 0
+

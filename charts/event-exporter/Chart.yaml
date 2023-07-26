@@ -1,0 +1,12 @@
+apiVersion: v2
+appVersion: "0.9"
+description: event-exporter
+name: event-exporter
+version: 0.0.4
+icon: https://3.bp.blogspot.com/-9_-b0nEDB94/XDeXlBAancI/AAAAAAAAEo0/T7V1-SK_MWcXgNDxbrk1uJTaPTDZPATyACLcBGAs/s1600/helm.png
+home: https://github.com/kfirfer/helm/tree/master/charts/event-exporter
+maintainers:
+  - email: kfirfer@gmail.com
+    name: kfir
+annotations:
+  category: LogManagement

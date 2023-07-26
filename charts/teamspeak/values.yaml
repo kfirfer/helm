@@ -1,0 +1,76 @@
+affinity: {}
+config: {}
+#  TS3SERVER_DB_CLIENTKEEPDAYS: "30"
+#  TS3SERVER_DB_CONNECTIONS: "10"
+#  TS3SERVER_DB_PLUGIN: ts3db_sqlite3
+#  TS3SERVER_DB_PLUGINPARAMETER: ""
+#  TS3SERVER_DB_SQLCREATEPATH: ""
+#  TS3SERVER_DB_SQLPATH: /opt/ts3server/sql/
+#  TS3SERVER_IP_BLACKLIST: /var/ts3server/query_ip_blacklist.txt
+#  TS3SERVER_IP_WHITELIST: /var/ts3server/query_ip_whitelist.txt
+#  TS3SERVER_LICENSE: ""
+#  TS3SERVER_LICENSEPATH: /var/ts3server/
+#  TS3SERVER_LOG_APPEND: "0"
+#  TS3SERVER_LOG_PATH: /var/ts3server/logs/
+#  TS3SERVER_LOG_QUERY_COMMANDS: "0"
+#  TS3SERVER_QUERY_PROTOCOLS: ssh
+#  TS3SERVER_QUERY_SSH_RSA_HOST_KEY: /var/ts3server/host.key
+#  TS3SERVER_QUERY_TIMEOUT: "300"
+fullnameOverride: ""
+image:
+  pullPolicy: IfNotPresent
+  repository: teamspeak
+  tagOverride: null
+imagePullSecrets: []
+
+# Override current command
+#command: ["/bin/sh", "-c", "sleep 10"]
+
+livenessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+nameOverride: ""
+nodeSelector: {}
+podSecurityContext: {}
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+replicaCount: 1
+resources: {}
+securityContext: {}
+service:
+  file:
+    externalIPs: []
+    loadBalancerIP: null
+    externalTrafficPolicy: ""
+    port: 30033
+    type: ClusterIP
+  query:
+    externalIPs: []
+    loadBalancerIP: null
+    externalTrafficPolicy: ""
+    rawPort: 10011
+    sshPort: 10022
+    type: ClusterIP
+  voice:
+    externalIPs: []
+    loadBalancerIP: null
+    externalTrafficPolicy: ""
+    ports:
+    - 9987
+    type: ClusterIP
+serviceAccount:
+  annotations: {}
+  create: false
+  name: null
+storage:
+  data:
+    accessModes:
+    - ReadWriteMany
+    class: null
+    enabled: true
+    existingClaim: null
+    name: data
+    size: 1Gi
+tolerations: []
+podAnnotations: {}

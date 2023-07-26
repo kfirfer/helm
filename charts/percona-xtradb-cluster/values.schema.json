@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "replicas": {
+      "type": "integer",
+      "form": true,
+      "title": "Number of Replicas",
+      "min": 1,
+      "max": 30
+    },
+    "mysqlRootPassword": {
+      "type": "string",
+      "description": "Specify password for root user. if not specified random password will generate",
+      "title": "MySQL root password",
+      "form": true
+    },
+    "xtraBackupPassword": {
+      "type": "string",
+      "description": "Specify password for xtradb backup user. if not specified random password will generate",
+      "title": "MySQL xtrabackup user password",
+      "form": true
+    },
+    "mysqlDatabase": {
+      "type": "string",
+      "description": "Optional: Create a database",
+      "title": "Database name",
+      "form": true
+    },
+    "pxcStrictMode": {
+      "type": "string",
+      "description": "PXC Strict Mode is designed to avoid the use of experimental and unsupported features in Percona XtraDB Cluster. It performs a number of validations at startup and during runtime.",
+      "title": "PXC Strict Mode",
+      "form": true
+    },
+    "resources": {
+      "type": "object",
+      "title": "Required Resources",
+      "form": true,
+      "properties": {
+        "requests": {
+          "type": "object",
+          "properties": {
+            "memory": {
+              "type": "string",
+              "form": true,
+              "render": "slider",
+              "title": "Memory Request",
+              "sliderMin": 50,
+              "sliderMax": 2000,
+              "sliderUnit": "Mi"
+            },
+            "cpu": {
+              "type": "string",
+              "form": true,
+              "render": "slider",
+              "title": "CPU Request",
+              "sliderMin": 50,
+              "sliderMax": 2000,
+              "sliderUnit": "m"
+            }
+          }
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "form": true,
+      "title": "Persistence Volume",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "form": true,
+          "title": "Use Persistent Volume",
+          "description": "Enable persistent volume instead emptyDir"
+        },
+        "size": {
+          "type": "string",
+          "title": "Persistent Volume Size",
+          "form": true,
+          "render": "slider",
+          "sliderMin": 1,
+          "sliderMax": 100,
+          "sliderUnit": "Gi",
+          "hidden": {
+            "value": false,
+            "path": "persistence/enabled"
+          }
+        }
+      }
+    },
+    "affinity": {
+      "type": "boolean",
+      "description": "ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
+      "form": true,
+      "title": "affinity"
+    },
+    "livenessProbe": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Self healing. not recommended on production environment when it is a database",
+          "form": true,
+          "title": "enabled"
+        }
+      }
+    }
+  }
+}

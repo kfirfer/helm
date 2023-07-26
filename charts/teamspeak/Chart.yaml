@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: 3.13.7
+description: TeamSpeak is software for quality voice communication via the Internet.
+name: teamspeak
+type: application
+version: 1.2.1

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: g-cronjob
+description: A Helm chart for Kubernetes
+icon: https://www.mysql.com/common/logos/logo-mysql-170x115.png
+type: application
+version: 0.0.5
+appVersion: latest
+home: https://github.com/kfirfer/helm/tree/master/charts/g-cronjob
+maintainers:
+  - email: kfirfer@gmail.com
+    name: kfir
+annotations:
+  category: Application

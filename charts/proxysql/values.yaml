@@ -1,0 +1,114 @@
+# values.yaml
+
+# Docker image to use for deployment
+image:
+  repository: "severalnines/proxysql"
+  tag: "2.0.15"
+
+# Default number of ProxySQL replicas
+numReplicas: 2
+
+terminationGracePeriodSeconds: 30
+
+# Default admin username
+proxysql:
+  admin:
+    username: admin
+    password: admin
+    # Connect on this port to administer ProxySQL, view stats, etc.
+    iface: "0.0.0.0"
+    port: 6032
+  clusterAdmin:
+    username: clusteradmin
+    password: admin
+  # Query Cache Size
+  # queryCacheSizeMb: 256
+  # ProxySQL needs a cluster name
+  dataDir: "/var/lib/proxysql"
+  webEnabled: true
+  monitorConfigChange: false
+  additionConfig: |
+    mysql_servers =
+    (
+        { address="mysql_server_0.headless_service.namespace.svc.cluster.local", port=3306 , hostgroup=10, max_connections=500 },
+        { address="mysql_server_1.headless_service.namespace.svc.cluster.local", port=3306 , hostgroup=10, max_connections=500 },
+        { address="mysql_server_2.headless_service.namespace.svc.cluster.local", port=3306 , hostgroup=10, max_connections=500 }
+    )
+    mysql_galera_hostgroups =
+    (
+        {
+          writer_hostgroup=10
+          backup_writer_hostgroup=20
+          reader_hostgroup=30
+          offline_hostgroup=9999
+          max_writers=1
+          writer_is_also_reader=1
+          max_transactions_behind=30
+          active=1
+        }
+    )
+    mysql_users =
+    (
+        { username = "root" , password = "rootpass" , default_hostgroup = 10 ,transaction_persistent = 0, active = 1 }
+    )
+    mysql_query_rules =
+    (
+        {
+            rule_id=100
+            active=1
+            match_pattern="^SELECT .* FOR UPDATE"
+            destination_hostgroup=10
+            apply=1
+        },
+        {
+            rule_id=200
+            active=1
+            match_pattern="^SELECT .*"
+            destination_hostgroup=30
+            apply=1
+        },
+        {
+            rule_id=300
+            active=1
+            match_pattern=".*"
+            destination_hostgroup=10
+            apply=1
+        }
+    )
+
+# MySQL Settings
+mysql:
+  # Applications connect on this port to run queries
+  iface: "0.0.0.0"
+  port: 3306
+  version: "8.0.19-10"
+  # This is the monitor user, just needs usage rights on the databases
+  monitor:
+    username: root
+    password: rootpass
+  admin:
+    username: root
+    password: rootpass
+
+lifecycle:
+  preStop:
+    exec:
+      command: ["/bin/sh", "-c", "sleep 5"]
+
+# Hard means that by default pods will only be scheduled if there are enough nodes for them
+# and that they will never end up on the same node. Setting this to soft will do this "best effort"
+antiAffinity: "soft"
+
+# Only used if you choose soft
+weight: 1
+
+antiAffinityTopologyKey: "kubernetes.io/hostname"
+
+# Resource requests and limits
+resources: {}
+
+# Assigning Pods to Nodes
+nodeSelector: {}
+
+# Optional tolerations
+tolerations: {}
